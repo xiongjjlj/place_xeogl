@@ -57,36 +57,35 @@
             });
 
             var cameraControl = new xeogl.CameraControl({
-                panToPointer: true,
-                pivoting: true
+                doublePickFlyTo: false
             });
-
+            
             var cameraFlight = new xeogl.CameraFlightAnimation();
 
-        //    cameraControl.on("hoverEnter", function (hit) {
-        //        hit.mesh.highlighted = true;
-        //    });
-        //
-        //    cameraControl.on("hoverOut", function (hit) {
-        //        hit.mesh.highlighted = false;
-        //    });
+            cameraControl.on("hoverEnter", function (hit) {
+                for (var object = hit.mesh; object.parent; object = object.parent) {
+                    object.aabbVisible = true;
+                }
+            });
+
+            cameraControl.on("hoverOut", function (hit) {
+                for (var object = hit.mesh; object.parent; object = object.parent) {
+                    object.aabbVisible = false;
+                }
+            });
 
             cameraControl.on("picked", function (hit) {
-                if (scene.input.keyDown[input.KEY_SHIFT]) {
-                    hit.mesh.selected = !hit.mesh.selected;
-                } else {
-                    cameraFlight.flyTo(hit.mesh);
-                }
+                cameraFlight.flyTo(hit.mesh);
             });
 
             cameraControl.on("pickedNothing", function (hit) {
                 cameraFlight.flyTo(model);
             });
 
-
-            cameraControl.on("picked", function (e) {
-                console.log(e.mesh.id)
-            });
+            scene.highlightMaterial.fillAlpha = 0.6;
+            scene.highlightMaterial.edgeAlpha = 0.6;
+            scene.highlightMaterial.edgeColor = [0, 0, 0];
+            scene.highlightMaterial.edgeWidth = 2;
 
             model.on("loaded", function () {
 
