@@ -9,7 +9,14 @@ xeogl.setDefaultScene(scene);
 //---------------------------------------------------
 
 var model = new xeogl.GLTFModel({
-    id: "camera",
+    id: "hopson",
+    src: "/static/models/hopson.gltf",
+    scale: [.001, .001, .001],
+    edgeThreshold: 20,
+});
+
+var cameraGroup = new xeogl.GLTFModel({
+    id: "cameraGroup",
     src: "/static/models/camera.gltf",
     scale: [.001, .001, .001],
     edgeThreshold: 20,
@@ -27,7 +34,6 @@ var model = new xeogl.GLTFModel({
         };
     })()
 });
-
 //-----------------------------------------------------------------------------------------------------
 // Camera
 //-----------------------------------------------------------------------------------------------------
@@ -43,7 +49,15 @@ model.on("loaded", function () {
     scene.on("tick", function () { // Slowly orbit the camera
 
     });
-    model.objects["gearbox.1"].highlighted = true;
+    // model.objects["gearbox.1"].highlighted = true;
+    console.log(model.objects);
+});
+
+cameraGroup.on("loaded", function () {
+    scene.on("tick", function () { // Slowly orbit the camera
+
+    });
+    cameraGroup.objects["gearbox.1"].highlighted = true;
     console.log(model.objects);
 });
 
