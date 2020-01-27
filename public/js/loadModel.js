@@ -27,7 +27,8 @@ var cameraGroup = new xeogl.GLTFModel({
             if (nodeInfo.mesh !== undefined) { // Node has a mesh
 
                 actions.createObject = {
-                    id: "gearbox." + objectCount++
+                    id:"camera." + objectCount++,
+                    guid: "camera." + objectCount++,
                 };
             }
             return true;
@@ -45,21 +46,7 @@ camera.look = [-79.57421875, -23.087656021118164, 2.36319637298584];
 camera.up = [0.24628230929374695, 0.7213045954704285, 0.6473535299301147];
 
 
-model.on("loaded", function () {
-    scene.on("tick", function () { // Slowly orbit the camera
 
-    });
-    // model.objects["gearbox.1"].highlighted = true;
-    console.log(model.objects);
-});
-
-cameraGroup.on("loaded", function () {
-    scene.on("tick", function () { // Slowly orbit the camera
-
-    });
-    cameraGroup.objects["gearbox.1"].highlighted = true;
-    console.log(model.objects);
-});
 
 var cameraControl = new xeogl.CameraControl({
     doublePickFlyTo: false
@@ -79,9 +66,7 @@ cameraControl.on("hoverOut", function (hit) {
     }
 });
 
-cameraControl.on("picked", function (hit) {
-    cameraFlight.flyTo(hit.mesh);
-});
+
 
 cameraControl.on("pickedNothing", function (hit) {
     cameraFlight.flyTo(model);
@@ -91,6 +76,29 @@ scene.highlightMaterial.fillAlpha = 0.6;
 scene.highlightMaterial.edgeAlpha = 0.6;
 scene.highlightMaterial.edgeColor = [0, 0, 0];
 scene.highlightMaterial.edgeWidth = 2;
+
+
+
+
+//-----------------------model.on-------------------------------------
+
+
+cameraGroup.on("loaded", function () {
+    scene.on("tick", function () { // Slowly orbit the camera
+
+    });
+    // cameraGroup.objects["camera.1"].highlighted = true;
+    // console.log(cameraGroup.children);
+    // console.log(cameraGroup.objects['camera.1']);
+});
+
+model.on("loaded", function () {
+    scene.on("tick", function () { // Slowly orbit the camera
+
+    });
+    // model.objects["gearbox.1"].highlighted = true;
+    // console.log(model.objects);
+});
 
 model.on("loaded", function () {
 
@@ -277,3 +285,97 @@ model.on("loaded", function () {
         return [arry[0] / 255, arry[1] / 255, arry[2] / 255];
     }
 });
+
+//-----------------------interactivity-------------------------------------
+cameraGroup.on("loaded", function () {
+    cameraControl.on("picked", function (hit) {
+        cameraFlight.flyTo(hit.mesh);
+        var text = document.createElement('img');
+        var canvas = document.querySelector('body');
+        console.log(canvas);
+        text.setAttribute('id', 'camera-1');
+        text.setAttribute('text', 'camera');
+        text.setAttribute('position', '50 50 50');
+        text.setAttribute('rotation', '0 45 0');
+        text.setAttribute('scale', '4000 4000 4000');
+        text.setAttribute('src', '/static/screenshot/J03.png');
+        canvas.appendChild(text);
+        text.addEventListener('click', function(event){
+            window.location.href = '/static/screenshot/J03.png';
+        })
+    });
+
+    // new xeogl.AnnotationStory({
+    //     speaking: false, // Set true to have a voice announce each annotation
+    //     authoring: true, // Set true to author the annotations
+    //     text: [
+    //         "# [Stories](../docs/classes/AnnotationStory.html) : Tron Tank Program",
+    //         "This is a Light Tank from the 1982 Disney movie *Tron*.",
+    //         "The [orange tracks](focusAnnotation(0)) on this tank indicate that ....",
+    //         "![](./images/Clu_Program.png)",
+    //         "The [cannon](focusAnnotation(1)) is the tank's main armament, which  ....",
+    //         "The [pilot hatch](focusAnnotation(2)) is where Clu enters and exits the tank.",
+    //         "At the back of the tank is the [antenna](focusAnnotation(3)) through ....",
+    //         "*\"I fight for the users!\" -- Clu*"
+    //     ],
+    //     annotations: [
+    //         {
+    //             primIndex: 204,
+    //             bary: [0.05, 0.16, 0.79],
+    //             occludable: true,
+    //             glyph: "A",
+    //             title: "Orange tracks",
+    //             desc: "Indicates that the pilot is the rebel hacker, Clu",
+    //             eye: [-180.21798706054688, 248.6997528076172, -262.179931640625],
+    //             look: [-79.57421875, -23.087656021118164, 2.36319637298584],
+    //             up: [0.24628230929374695, 0.7213045954704285, 0.6473535299301147],
+    //             pinShown: true,
+    //             labelShown: true,
+    //             mesh: 'cameraGroup.children[0]'
+    //         },
+    //         {
+    //             primIndex: 468,
+    //             bary: [0.05, 0.16, 0.79],
+    //             occludable: true,
+    //             glyph: "B",
+    //             title: "Cannon",
+    //             desc: "Fires chevron-shaped bolts of de-rezzing energy",
+    //             eye: [-0.66, 20.84, -21.59],
+    //             look: [-0.39, 6.84, -9.18],
+    //             up: [0.01, 0.97, 0.24],
+    //             pinShown: true,
+    //             labelShown: true,
+    //             mesh: cameraGroup.objects['camera.2']
+    //         },
+    //         {
+    //             primIndex: 216,
+    //             bary: [0.05, 0.16, 0.79],
+    //             occludable: true,
+    //             glyph: "C",
+    //             title: "Pilot hatch",
+    //             desc: "Clu hops in and out of the tank program here",
+    //             eye: [1.48, 11.79, -15.13],
+    //             look: [1.62, 5.04, -9.14],
+    //             up: [0.01, 0.97, 0.24],
+    //             pinShown: true,
+    //             labelShown: true,
+    //             mesh: cameraGroup.children[3]
+    //         },
+    //         {
+    //             primIndex: 4464,
+    //             bary: [0.05, 0.16, 0.79],
+    //             occludable: true,
+    //             glyph: "D",
+    //             title: "Antenna",
+    //             desc: "Links the tank program to the Master Control Program",
+    //             eye: [13.63, 16.79, 13.87],
+    //             look: [1.08, 7.72, 3.07],
+    //             up: [0.08, 0.99, 0.07],
+    //             pinShown: true,
+    //             labelShown: true,
+    //             mesh: cameraGroup.children[4]
+    //         }
+    //     ]
+    // });
+});
+
