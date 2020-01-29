@@ -41,8 +41,8 @@ var cameraGroup = new xeogl.GLTFModel({
 var camera = scene.camera;
 
 camera.eye = [-180.21798706054688, 248.6997528076172, -262.179931640625];
-camera.look = [-79.57421875, -23.087656021118164, 2.36319637298584];
-camera.up = [0.24628230929374695, 0.7213045954704285, 0.6473535299301147];
+camera.look = [206, 7, -170];
+camera.up = [0,1,0];
 
 
 
@@ -290,6 +290,7 @@ model.on("loaded", function () {
 
 cameraControl.on("picked", function (hit) {
     cameraFlight.flyTo(hit.mesh);
+    console.log(hit.mesh);
     path = '/static/screenshot/' + hit.mesh.id + '.png'
 
     var img = document.createElement('img');
@@ -303,78 +304,69 @@ cameraControl.on("picked", function (hit) {
     //     window.location.href = '/static/screenshot/J03.png';
     // })
 
-
-    // new xeogl.AnnotationStory({
-    //     speaking: false, // Set true to have a voice announce each annotation
-    //     authoring: true, // Set true to author the annotations
-    //     text: [
-    //         "# [Stories](../docs/classes/AnnotationStory.html) : Tron Tank Program",
-    //         "This is a Light Tank from the 1982 Disney movie *Tron*.",
-    //         "The [orange tracks](focusAnnotation(0)) on this tank indicate that ....",
-    //         "![](./images/Clu_Program.png)",
-    //         "The [cannon](focusAnnotation(1)) is the tank's main armament, which  ....",
-    //         "The [pilot hatch](focusAnnotation(2)) is where Clu enters and exits the tank.",
-    //         "At the back of the tank is the [antenna](focusAnnotation(3)) through ....",
-    //         "*\"I fight for the users!\" -- Clu*"
-    //     ],
-    //     annotations: [
-    //         {
-    //             primIndex: 204,
-    //             bary: [0.05, 0.16, 0.79],
-    //             occludable: true,
-    //             glyph: "A",
-    //             title: "Orange tracks",
-    //             desc: "Indicates that the pilot is the rebel hacker, Clu",
-    //             eye: [-180.21798706054688, 248.6997528076172, -262.179931640625],
-    //             look: [-79.57421875, -23.087656021118164, 2.36319637298584],
-    //             up: [0.24628230929374695, 0.7213045954704285, 0.6473535299301147],
-    //             pinShown: true,
-    //             labelShown: true,
-    //             mesh: 'cameraGroup.children[0]'
-    //         },
-    //         {
-    //             primIndex: 468,
-    //             bary: [0.05, 0.16, 0.79],
-    //             occludable: true,
-    //             glyph: "B",
-    //             title: "Cannon",
-    //             desc: "Fires chevron-shaped bolts of de-rezzing energy",
-    //             eye: [-0.66, 20.84, -21.59],
-    //             look: [-0.39, 6.84, -9.18],
-    //             up: [0.01, 0.97, 0.24],
-    //             pinShown: true,
-    //             labelShown: true,
-    //             mesh: cameraGroup.objects['camera.2']
-    //         },
-    //         {
-    //             primIndex: 216,
-    //             bary: [0.05, 0.16, 0.79],
-    //             occludable: true,
-    //             glyph: "C",
-    //             title: "Pilot hatch",
-    //             desc: "Clu hops in and out of the tank program here",
-    //             eye: [1.48, 11.79, -15.13],
-    //             look: [1.62, 5.04, -9.14],
-    //             up: [0.01, 0.97, 0.24],
-    //             pinShown: true,
-    //             labelShown: true,
-    //             mesh: cameraGroup.children[3]
-    //         },
-    //         {
-    //             primIndex: 4464,
-    //             bary: [0.05, 0.16, 0.79],
-    //             occludable: true,
-    //             glyph: "D",
-    //             title: "Antenna",
-    //             desc: "Links the tank program to the Master Control Program",
-    //             eye: [13.63, 16.79, 13.87],
-    //             look: [1.08, 7.72, 3.07],
-    //             up: [0.08, 0.99, 0.07],
-    //             pinShown: true,
-    //             labelShown: true,
-    //             mesh: cameraGroup.children[4]
-    //         }
-    //     ]
-    // });
 });
 
+
+//-----------------------annotation-------------------------------------
+cameraGroup.on("loaded", function () {
+    // When each annotation's pin is clicked, we'll show the annotation's label 
+    var lastAnnotation;
+
+    function pinClicked(annotation) {
+        annotation.labelShown = !annotation.labelShown;
+        if (lastAnnotation) {
+            lastAnnotation.labelShown = false;
+        }
+        lastAnnotation = annotation;
+
+    }
+     
+    // Create three annotations on meshes
+    // within the model
+ 
+    for (i=1; i<10; i++ ){
+        var J0i = new xeogl.Annotation({
+            mesh: cameraGroup.objects['J0'+ i],
+            primIndex: 0,
+            bary: [0.33, 0.33, 0.33],
+            occludable: true,
+            glyph: "J0"+ i,
+            desc: 'Text Description Goes Here',
+            title: "Camera-J0" + i,
+            pinShown: true,
+            labelShown: false
+        });
+        
+        J0i.on("pinClicked", pinClicked);
+        // console.log(J0i.mesh);
+    }
+    for (i=10; i<36; i++ ){
+        var Ji = new xeogl.Annotation({
+            mesh: cameraGroup.objects['J'+ i], 
+            primIndex: 0,
+            bary: [0.33, 0.33, 0.33],
+            occludable: true,
+            glyph: "J"+ i,
+            desc: 'Text Description Goes Here',
+            title: "Camera-J" + i,
+            pinShown: true,
+            labelShown: false
+        });
+        
+        Ji.on("pinClicked", pinClicked);
+
+    }
+
+
+ 
+    // If desired, we can also dynamically track the Cartesian coordinates
+    // of each annotation in Local and World coordinate spaces
+ 
+    // J03.on("localPos", function(localPos) {
+    //     console.log("Local pos changed: " + JSON.stringify(localPos, null, "\t"));
+    // });
+ 
+    // J03.on("worldPos", function(worldPos) {
+    //     console.log("World pos changed: " + JSON.stringify(worldPos, null, "\t"));
+    // });
+ });
