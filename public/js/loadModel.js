@@ -27,8 +27,7 @@ var cameraGroup = new xeogl.GLTFModel({
             if (nodeInfo.mesh !== undefined) { // Node has a mesh
 
                 actions.createObject = {
-                    id:"camera." + objectCount++,
-                    guid: "camera." + objectCount++,
+                    id: nodeInfo.name,
                 };
             }
             return true;
@@ -54,6 +53,7 @@ var cameraControl = new xeogl.CameraControl({
 
 var cameraFlight = new xeogl.CameraFlightAnimation();
 
+//hover event
 cameraControl.on("hoverEnter", function (hit) {
     for (var object = hit.mesh; object.parent; object = object.parent) {
         object.aabbVisible = true;
@@ -287,23 +287,22 @@ model.on("loaded", function () {
 });
 
 //-----------------------interactivity-------------------------------------
-cameraGroup.on("loaded", function () {
-    cameraControl.on("picked", function (hit) {
-        cameraFlight.flyTo(hit.mesh);
-        var text = document.createElement('img');
-        var canvas = document.querySelector('body');
-        console.log(canvas);
-        text.setAttribute('id', 'camera-1');
-        text.setAttribute('text', 'camera');
-        text.setAttribute('position', '50 50 50');
-        text.setAttribute('rotation', '0 45 0');
-        text.setAttribute('scale', '4000 4000 4000');
-        text.setAttribute('src', '/static/screenshot/J03.png');
-        canvas.appendChild(text);
-        text.addEventListener('click', function(event){
-            window.location.href = '/static/screenshot/J03.png';
-        })
-    });
+
+cameraControl.on("picked", function (hit) {
+    cameraFlight.flyTo(hit.mesh);
+    path = '/static/screenshot/' + hit.mesh.id + '.png'
+
+    var img = document.createElement('img');
+    var canvas = document.querySelector('body');
+    img.setAttribute('id', hit.mesh.id);
+    img.setAttribute('class', 'camera');
+    img.setAttribute('height', '100');
+    img.setAttribute('src', path);
+    canvas.appendChild(img);
+    // img.addEventListener('click', function(event){
+    //     window.location.href = '/static/screenshot/J03.png';
+    // })
+
 
     // new xeogl.AnnotationStory({
     //     speaking: false, // Set true to have a voice announce each annotation
