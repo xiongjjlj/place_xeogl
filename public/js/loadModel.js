@@ -40,8 +40,8 @@ var cameraGroup = new xeogl.GLTFModel({
 
 var camera = scene.camera;
 
-camera.eye = [-180.21798706054688, 248.6997528076172, -262.179931640625];
-camera.look = [206, 7, -170];
+camera.eye = [100, 100, -100];
+camera.look = [150, 7, -170];
 camera.up = [0,1,0];
 
 
@@ -292,16 +292,16 @@ cameraControl.on("picked", function (hit) {
     cameraFlight.flyTo(hit.mesh);
     console.log(hit.mesh);
     path = '/static/screenshot/' + hit.mesh.id + '.png'
-
     var img = document.createElement('img');
-    var canvas = document.querySelector('body');
+    var canvas = document.querySelector('#photo');
     img.setAttribute('id', hit.mesh.id);
+    img.setAttribute('alt', 'camera photo missing')
     img.setAttribute('class', 'camera');
     img.setAttribute('height', '100');
     img.setAttribute('src', path);
     canvas.appendChild(img);
     // img.addEventListener('click', function(event){
-    //     window.location.href = '/static/screenshot/J03.png';
+    // window.location.href = '/static/screenshot/J03.png';   
     // })
 
 });
