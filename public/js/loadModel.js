@@ -13,6 +13,7 @@ var model = new xeogl.GLTFModel({
     src: "/static/models/hopson.gltf",
     scale: [.001, .001, .001],
     edgeThreshold: 20,
+    pickable: false,
 });
 
 var cameraGroup = new xeogl.GLTFModel({
@@ -81,16 +82,6 @@ scene.highlightMaterial.edgeWidth = 2;
 
 
 //-----------------------model.on-------------------------------------
-
-
-cameraGroup.on("loaded", function () {
-    scene.on("tick", function () { // Slowly orbit the camera
-
-    });
-    // cameraGroup.objects["camera.1"].highlighted = true;
-    // console.log(cameraGroup.children);
-    // console.log(cameraGroup.objects['camera.1']);
-});
 
 model.on("loaded", function () {
     scene.on("tick", function () { // Slowly orbit the camera
@@ -314,15 +305,15 @@ cameraGroup.on("loaded", function () {
 
     function pinClicked(annotation) {
         annotation.labelShown = !annotation.labelShown;
-        if (lastAnnotation) {
-            lastAnnotation.labelShown = false;
-        }
+        // if (lastAnnotation) {
+        //     lastAnnotation.labelShown = false;
+        // }
         lastAnnotation = annotation;
 
     }
      
-    // Create three annotations on meshes
-    // within the model
+    // ----------------------------Create three annotations on meshes
+    // ----------------------------within the model
  
     for (i=1; i<10; i++ ){
         var J0i = new xeogl.Annotation({
@@ -332,13 +323,12 @@ cameraGroup.on("loaded", function () {
             occludable: true,
             glyph: "J0"+ i,
             desc: 'Text Description Goes Here',
-            title: "Camera-J0" + i,
+            // title: "Camera-J0" + i,
             pinShown: true,
             labelShown: false
         });
         
-        J0i.on("pinClicked", pinClicked);
-        // console.log(J0i.mesh);
+        // J0i.on("pinClicked", pinClicked);
     }
     for (i=10; i<36; i++ ){
         var Ji = new xeogl.Annotation({
@@ -353,11 +343,52 @@ cameraGroup.on("loaded", function () {
             labelShown: false
         });
         
-        Ji.on("pinClicked", pinClicked);
+        // Ji.on("pinClicked", pinClicked);
+    }
 
+    //----------------------------for store information annotation
+    for (i=1; i<10; i++ ){
+        var storei = new xeogl.Annotation({
+            mesh: cameraGroup.objects['200'+ i], 
+            id:"Anno200"+ i,
+            primIndex: 0,
+            bary: [0.33, 0.33, 0.33],
+            occludable: false,
+            glyph: "200"+ i,
+            desc: 'Store Number: 200' + i,
+            pinShown: false,
+            labelShown: false,
+        });   
+    }
+    for (i=10; i<39; i++ ){
+        var storei = new xeogl.Annotation({
+            mesh: cameraGroup.objects['20'+ i], 
+            id:"Anno20"+ i,
+            primIndex: 0,
+            bary: [0.33, 0.33, 0.33],
+            occludable: false,
+            glyph: "20"+ i,
+            desc: 'Store Number: 20' + i,
+            pinShown: false,
+            labelShown: false,
+        });   
     }
 
 
+    var lastStore;
+    function storeClicked(store) {
+        store.labelShown = !store.labelShown;
+        // if (lastStore) {
+        //     lastStore.pinShown = false;
+        // }
+        lastStore = store;
+    }
+
+    cameraControl.on('picked',function(hit){
+        store = scene.components['Anno'+ hit.mesh.id];
+        storeClicked(store);
+    })
+ 
  
     // If desired, we can also dynamically track the Cartesian coordinates
     // of each annotation in Local and World coordinate spaces
