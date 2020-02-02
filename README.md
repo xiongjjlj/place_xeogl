@@ -11,3 +11,6 @@
 1. add legends for the visualization
 2. highlight store zone, or camera if clicked
 3. other aesthetic changes as to be suggested by UX designer
+
+Also, please see the example for the final visualization:
+https://gisanddata.maps.arcgis.com/apps/opsdashboard/index.html#/bda7594740fd40299423467b48e9ecf6
