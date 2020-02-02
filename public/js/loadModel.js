@@ -12,7 +12,7 @@ stores =  ['2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009
 
 var scene = new xeogl.Scene({
     transparent: true,
-    canvas: document.getElementById("vis-canvas")
+    backgroundColor: [0.125, 0.125, 0.125]
 });
 
 xeogl.setDefaultScene(scene);
@@ -34,7 +34,7 @@ var cameraGroup = new xeogl.GLTFModel({
     src: "/static/models/camera.gltf",
     scale: [.001, .001, .001],
     edgeThreshold: 20,
-    opacity: 0.2,
+    opacity: 0.4,
     handleNode: (function(nodeInfo, actions) {
         var objectCount = 0;
         return function (nodeInfo, actions) {
@@ -273,7 +273,9 @@ model.on("loaded", function () {
 //-----------------------annotation-------------------------------------
 cameraGroup.on("loaded", function () {
     // When each annotation's pin is clicked, we'll show the annotation's label 
+    console.log(xeogl.getDefaultScene());
 
+    // triggered when hitting camera pin
     function pinClicked(hit) {
         // annotation.labelShown = !annotation.labelShown;
         // if (lastAnnotation) {
@@ -282,14 +284,18 @@ cameraGroup.on("loaded", function () {
         annotation = hit.mesh.id
         path = '/static/screenshot/' + annotation + '.png'
         var img = document.createElement('img');
-        var canvas = document.querySelector('#photo');
+        // var canvas = document.querySelector('#photo');
+        var canvas = $('#camera-info', parent.document)
         img.setAttribute('id', annotation);
         img.setAttribute('alt', 'camera photo missing')
-        img.setAttribute('class', 'camera');
+        img.setAttribute('class', 'camera-image');
         img.setAttribute('height', '100');
         img.setAttribute('src', path);
-        canvas.appendChild(img);
 
+        canvas.empty();
+        canvas.append(`<h2 id="first-level-title">Camera Information</h2>`)
+        canvas.append(img);
+        canvas.append(`<p id="second-level-title">Other information below: floor level; resolution; some overall stats from processing</p>`)
         // console.log(`${annotation} clicked`)
         lastAnnotation = annotation;
     }
@@ -340,23 +346,13 @@ cameraGroup.on("loaded", function () {
 
     //register all events
 
-
     cameraControl.on('picked', function(hit){
-        object = scene.components['Anno'+ hit.mesh.id];
-        // ------ for camera
-        if (object.primIndex == 0) {
-            // cameraFlight.flyTo(hit.mesh);
-            // img.addEventListener('click', function(event){
-            // window.location.href = '/static/screenshot/J03.png';   
-            // })
-            // do other things for camera
-        }
-
         // ------ for store
-        else if (object.primIndex == 1) {
-            lastStore = object;
+        if (stores.includes(hit.mesh.id)) {
+            lastStore = object;            
             // do other things for store
         }
+
     })
 
     cameraControl.on("hoverEnter", function (hit) {     
