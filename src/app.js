@@ -36,7 +36,7 @@ app.use(function(err, req, res, next) {
 });
 
 // port config
-const port = 3000; // config variable
+const port = 8000; // config variable
 const server = http.Server(app);
 server.listen(port, function() {
   console.log('Server running on port: ' + port);

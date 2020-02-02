@@ -5,6 +5,17 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 
+        <!-- jquery cdn -->
+        <script
+            src="https://code.jquery.com/jquery-3.4.1.js"
+            integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+            crossorigin="anonymous"></script>
+
+        <!-- bootstrap cdn -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+        <!-- static resources -->
         <script src="/static/js/xeogl.js"></script>
         <script src="/static/js/glTFModel.js"></script>
         <script src="/static/js/skybox.js"></script>
@@ -20,29 +31,34 @@
         <script src="/static/js/story.js"></script>
         <script src="/static/js/annotationStory.js"></script>
         <link href="/static/css/story-style.css" rel="stylesheet"/>
-        <script src = '/static/css/annotation.css'></script>
+        <link src = '/static/css/annotation.css' rel="stylesheet"/>
         <!-- annotation------------------------------------ -->
 
 
-
         <link href="/static/css/styles.css" rel="stylesheet"/>
-
-        <style>
-            body {
-                background-color: black;
-                padding: 0;
-                margin: 0;
-            }
-        </style>
     </head>
     <body>
-        <div id="info">
-            <h1>HOPSON: Camera & Business Analysis System </h1>
-            <pre id="log">Credits: PLACE.int</pre>
+        <div class="row module-container" id="header">
+            <h1 style="width: 100%">HOPSON: Camera & Business Analysis System </h1>
+            <p style="width: 100%">Place.Int + Hopson One </p>
+            <!-- <pre id="log">Credits: PLACE.int</pre> -->
         </div>
-        <div id="photo" style="position:relative;top:150px"></div>
-
+        <div class="row" style="height: 200px">
+            <div class="col-2" style="padding: 0">
+                <div class="module-container"></div>
+            </div>
+            <div class="col-8" style="padding: 0">
+                <div class="module-container">
+                    <canvas id="vis-canvas" width="640" height="480"></canvas>
+                </div>
+            </div>
+            <div class="col-2" style="padding: 0">
+                <div class="module-container" id="photo">
+                </div>
+            </div>
+        </div>
 
         <script src='/static/js/loadModel.js'></script>
     </body>
 </html>
+

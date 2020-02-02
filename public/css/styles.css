@@ -11,7 +11,7 @@ body {
     -webkit-font-smoothing: antialiased;
     overflow-y: hidden;
     overflow-x: hidden;
-    margin: 0;
+    padding: 5px;
 }
 
 
@@ -50,17 +50,17 @@ body {
 }
 
 #info {
-    position: absolute;
-    top: 0px;
+    /*position: absolute;*/
+    /*top: 0px;*/
     z-index: 200000;
     /*font-weight: 600;*/
     float: left;
-    left: 0px;
-    padding: 10px;
+    /*left: 0px;*/
+    /*padding: 10px;*/
     /*border-radius: 0 0 4px 0;*/
     /*border-radius:6px;*/
-    height: auto;
-    text-align: left;
+    /*height: auto;*/
+    text-align: center;
     /*border: solid 1px #bdbcbc;*/
     pointer-events: none;
 }
@@ -225,14 +225,7 @@ body {
 }
 
 #header {
-    background: white;
-    width: 100%;
-    max-width: 900px;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 10px;
-    padding-top: 50px;
-    padding-bottom: 50px;
+    text-align: center;
 }
 
 #image {
@@ -487,4 +480,24 @@ ul ul {
     padding-bottom: 4px;
     margin-top: 0;
     margin-bottom: 4px;
+}
+
+#vis-canvas{
+    width: 100%;
+    height: 100%;
+}
+
+.module-container {
+    background-color: #222;
+    border: 1px solid #363636;
+    margin: 3px !important;
+    height: 100%;
+}
+
+.row {
+    margin: auto;
+}
+
+.xeogl-annotation-pin {
+    font-size: 0.8em;
 }
