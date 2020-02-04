@@ -9,10 +9,12 @@
     height: 25px;
     border-radius: 15px;
     border: 2px solid #ffffff;
+    font-size: 0.8em;
     background: black;
     visibility: hidden;
     box-shadow: 5px 5px 15px 1px #000000;
     z-index: 0;
+
 }
 
 .xeogl-annotation-pinClickable {

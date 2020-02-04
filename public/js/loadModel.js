@@ -1,5 +1,18 @@
+cameras = ['J01', 'J02', 'J03', 'J04', 'J05', 'J06', 'J07', 'J08', 'J09', 
+'J11', 'J12', 'J13', 'J14', 'J15', 'J16', 'J17', 'J18', 'J19', 
+'J20', 'J21', 'J22', 'J23', 'J24', 'J25', 'J26', 'J27', 'J28', 
+'J29', 'J30', 'J31', 'J32', 'J33', 'J34', 'J35']
+
+stores =  ['2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009', '2011', 
+'2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', 
+'2020', '2021', '2022', '2023', '2024', '2025', '2026', '2027', 
+'2028', '2029', '2030', '2031', '2032', '2033', '2034', '2035', 
+'2036', '2037', '2038']
+
+
 var scene = new xeogl.Scene({
-    transparent: true
+    transparent: true,
+    backgroundColor: [0.125, 0.125, 0.125]
 });
 
 xeogl.setDefaultScene(scene);
@@ -21,10 +34,11 @@ var cameraGroup = new xeogl.GLTFModel({
     src: "/static/models/camera.gltf",
     scale: [.001, .001, .001],
     edgeThreshold: 20,
+    opacity: 0.4,
     handleNode: (function(nodeInfo, actions) {
         var objectCount = 0;
         return function (nodeInfo, actions) {
-            console.log(nodeInfo);
+            // console.log(nodeInfo);
             if (nodeInfo.mesh !== undefined) { // Node has a mesh
 
                 actions.createObject = {
@@ -35,18 +49,18 @@ var cameraGroup = new xeogl.GLTFModel({
         };
     })()
 });
+
 //-----------------------------------------------------------------------------------------------------
 // Camera
 //-----------------------------------------------------------------------------------------------------
 
 var camera = scene.camera;
+var lastStore;
+var lastAnnotation;
 
 camera.eye = [100, 100, -100];
 camera.look = [150, 7, -170];
 camera.up = [0,1,0];
-
-
-
 
 var cameraControl = new xeogl.CameraControl({
     doublePickFlyTo: false
@@ -54,31 +68,10 @@ var cameraControl = new xeogl.CameraControl({
 
 var cameraFlight = new xeogl.CameraFlightAnimation();
 
-//hover event
-cameraControl.on("hoverEnter", function (hit) {
-    for (var object = hit.mesh; object.parent; object = object.parent) {
-        object.aabbVisible = true;
-    }
-});
-
-cameraControl.on("hoverOut", function (hit) {
-    for (var object = hit.mesh; object.parent; object = object.parent) {
-        object.aabbVisible = false;
-    }
-});
-
-
-
-cameraControl.on("pickedNothing", function (hit) {
-    cameraFlight.flyTo(model);
-});
-
 scene.highlightMaterial.fillAlpha = 0.6;
 scene.highlightMaterial.edgeAlpha = 0.6;
 scene.highlightMaterial.edgeColor = [0, 0, 0];
 scene.highlightMaterial.edgeWidth = 2;
-
-
 
 
 //-----------------------model.on-------------------------------------
@@ -277,118 +270,67 @@ model.on("loaded", function () {
     }
 });
 
-//-----------------------interactivity-------------------------------------
-
-cameraControl.on("picked", function (hit) {
-    cameraFlight.flyTo(hit.mesh);
-    console.log(hit.mesh);
-    path = '/static/screenshot/' + hit.mesh.id + '.png'
-    var img = document.createElement('img');
-    var canvas = document.querySelector('#photo');
-    img.setAttribute('id', hit.mesh.id);
-    img.setAttribute('alt', 'camera photo missing')
-    img.setAttribute('class', 'camera');
-    img.setAttribute('height', '100');
-    img.setAttribute('src', path);
-    canvas.appendChild(img);
-    // img.addEventListener('click', function(event){
-    // window.location.href = '/static/screenshot/J03.png';   
-    // })
-
-});
-
-
 //-----------------------annotation-------------------------------------
 cameraGroup.on("loaded", function () {
     // When each annotation's pin is clicked, we'll show the annotation's label 
-    var lastAnnotation;
 
-    function pinClicked(annotation) {
-        annotation.labelShown = !annotation.labelShown;
+    // triggered when hitting camera pin
+    function pinClicked(hit) {
+        // annotation.labelShown = !annotation.labelShown;
         // if (lastAnnotation) {
         //     lastAnnotation.labelShown = false;
         // }
-        lastAnnotation = annotation;
+        annotation = hit.mesh.id
+        path = '/static/screenshot/' + annotation + '.png'
+        var img = document.createElement('img');
+        // var canvas = document.querySelector('#photo');
+        var canvas = $('#camera-info', parent.document)
+        img.setAttribute('id', annotation);
+        img.setAttribute('alt', 'camera photo missing')
+        img.setAttribute('class', 'camera-image');
+        img.setAttribute('height', '100');
+        img.setAttribute('src', path);
 
+        canvas.empty();
+        canvas.append(`<h2 id="first-level-title">Camera Information</h2>`)
+        canvas.append(img);
+        canvas.append(`<p id="second-level-title">Other information below: floor level; resolution; some overall stats from processing</p>`)
+        // console.log(`${annotation} clicked`)
+        lastAnnotation = annotation;
     }
      
     // ----------------------------Create three annotations on meshes
     // ----------------------------within the model
- 
-    for (i=1; i<10; i++ ){
-        var J0i = new xeogl.Annotation({
-            mesh: cameraGroup.objects['J0'+ i],
-            primIndex: 0,
+    
+    //---------------------------- for camera information annotation
+    cameras.forEach(camera_id => {
+        var temp_anno = new xeogl.Annotation(scene, {
+            mesh: cameraGroup.objects[camera_id],
+            id: "Anno"+ camera_id,
             bary: [0.33, 0.33, 0.33],
             occludable: true,
-            glyph: "J0"+ i,
+            glyph: camera_id,
             desc: 'Text Description Goes Here',
-            // title: "Camera-J0" + i,
+            title: "Camera-" + camera_id,
             pinShown: true,
             labelShown: false
         });
-        
-        // J0i.on("pinClicked", pinClicked);
-    }
-    for (i=10; i<36; i++ ){
-        var Ji = new xeogl.Annotation({
-            mesh: cameraGroup.objects['J'+ i], 
-            primIndex: 0,
-            bary: [0.33, 0.33, 0.33],
-            occludable: true,
-            glyph: "J"+ i,
-            desc: 'Text Description Goes Here',
-            title: "Camera-J" + i,
-            pinShown: true,
-            labelShown: false
-        });
-        
-        // Ji.on("pinClicked", pinClicked);
-    }
-
-    //----------------------------for store information annotation
-    for (i=1; i<10; i++ ){
-        var storei = new xeogl.Annotation({
-            mesh: cameraGroup.objects['200'+ i], 
-            id:"Anno200"+ i,
-            primIndex: 0,
-            bary: [0.33, 0.33, 0.33],
-            occludable: false,
-            glyph: "200"+ i,
-            desc: 'Store Number: 200' + i,
-            pinShown: false,
-            labelShown: false,
-        });   
-    }
-    for (i=10; i<39; i++ ){
-        var storei = new xeogl.Annotation({
-            mesh: cameraGroup.objects['20'+ i], 
-            id:"Anno20"+ i,
-            primIndex: 0,
-            bary: [0.33, 0.33, 0.33],
-            occludable: false,
-            glyph: "20"+ i,
-            desc: 'Store Number: 20' + i,
-            pinShown: false,
-            labelShown: false,
-        });   
-    }
-
-
-    var lastStore;
-    function storeClicked(store) {
-        store.labelShown = !store.labelShown;
-        // if (lastStore) {
-        //     lastStore.pinShown = false;
-        // }
-        lastStore = store;
-    }
-
-    cameraControl.on('picked',function(hit){
-        store = scene.components['Anno'+ hit.mesh.id];
-        storeClicked(store);
+        temp_anno.on("pinClicked", pinClicked);
     })
- 
+
+    //---------------------------- for store information annotation
+    stores.forEach(store_id => {
+        var storei = new xeogl.Annotation(scene, {
+            mesh: cameraGroup.objects[store_id], 
+            id: "Anno"+ store_id,
+            bary: [0.33, 0.33, 0.33],
+            occludable: false,
+            glyph: store_id,
+            desc: 'Store ID: ' + store_id,
+            pinShown: false,
+            labelShown: false
+        });   
+    }) 
  
     // If desired, we can also dynamically track the Cartesian coordinates
     // of each annotation in Local and World coordinate spaces
@@ -400,4 +342,42 @@ cameraGroup.on("loaded", function () {
     // J03.on("worldPos", function(worldPos) {
     //     console.log("World pos changed: " + JSON.stringify(worldPos, null, "\t"));
     // });
+
+    //register all events
+
+    cameraControl.on('picked', function(hit){
+        // ------ for store
+        if (stores.includes(hit.mesh.id)) {
+            lastStore = object;            
+            // do other things for store
+        }
+
+    })
+
+    cameraControl.on("hoverEnter", function (hit) {     
+        // ------ for store
+        if (stores.includes(hit.mesh.id)) {
+            object = scene.components['Anno'+ hit.mesh.id];
+            object.mesh.aabbVisible = true;
+            object.labelShown = !object.labelShown;
+            // do other things for store
+        }
+    });
+
+    cameraControl.on("hoverOut", function (hit) {
+        // ------ for store
+        if (stores.includes(hit.mesh.id)) {
+            object = scene.components['Anno'+ hit.mesh.id];
+            object.mesh.aabbVisible = false;
+            object.colorize = [1.0, 0, 0];
+            object.labelShown = !object.labelShown;
+            // do other things for store
+        }
+    });
+
+    // if clicked on nothing, zoom to the full model
+    cameraControl.on("pickedNothing", function (hit) {
+        cameraFlight.flyTo(model);
+    });
+
  });
