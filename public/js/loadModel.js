@@ -273,7 +273,6 @@ model.on("loaded", function () {
 //-----------------------annotation-------------------------------------
 cameraGroup.on("loaded", function () {
     // When each annotation's pin is clicked, we'll show the annotation's label 
-    console.log(xeogl.getDefaultScene());
 
     // triggered when hitting camera pin
     function pinClicked(hit) {
