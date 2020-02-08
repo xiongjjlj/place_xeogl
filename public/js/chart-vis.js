@@ -4,10 +4,10 @@ function get_footfall(){
 
 		var canvas = document.createElement('canvas');
 		var context = canvas.getContext('2d');
-		var windowWidth = canvas.width = window.innerWidth;
+		var windowWidth = canvas.width = '100%';
 		var windowHeight = canvas.height = '200px';
 		$('#chart-container').append(canvas);
-		json = {'data': json, label: 's1', borderColor: 'blue'}
+		json = {'data': json, label: 'J16', borderColor: 'grey'}
 		var myLineChart = new Chart(context, {
 		    type: 'line',
 		    data: {

@@ -12,7 +12,8 @@ stores =  ['2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009
 
 var scene = new xeogl.Scene({
     transparent: true,
-    backgroundColor: [0.125, 0.125, 0.125]
+    backgroundColor: [0, 0, 0]
+    // backgroundColor: [0.125, 0.125, 0.125]
 });
 
 xeogl.setDefaultScene(scene);
@@ -292,9 +293,9 @@ cameraGroup.on("loaded", function () {
         img.setAttribute('src', path);
 
         canvas.empty();
-        canvas.append(`<h2 id="first-level-title">Camera Information</h2>`)
-        canvas.append(img);
-        canvas.append(`<p id="second-level-title">Other information below: floor level; resolution; some overall stats from processing</p>`)
+        canvas.append(`<h2 id="first-level-title">Camera Information</h2>`).hide().fadeIn(400)
+        canvas.append(img).hide().fadeIn(400);
+        canvas.append(`<p id="second-level-title">Other information below: floor level; resolution; some overall stats from processing</p>`).hide().fadeIn(400)
         // console.log(`${annotation} clicked`)
         lastAnnotation = annotation;
     }
