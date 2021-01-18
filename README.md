@@ -1,4 +1,10 @@
 # place_xeogl
+## new updates
+https://webpack.docschina.org/guides/getting-started/
+run 
+```npm run build```
+and
+```npm start```
 
 ### What this repo is about:
 This repo initially started as a 3d visualization project. As project progresses, this repo is then developed into the fundation for future visualization dashboard. This repo is maintained by xionjjlj and wzt1001.

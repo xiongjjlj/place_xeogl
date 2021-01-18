@@ -18,6 +18,7 @@ app.use(bodyParser.json());
 // set routes
 app.use('/', views);
 app.use('/static', express.static('public'));
+app.use('/', express.static('dist'));
 
 // 404 route
 app.use(function(req, res, next) {
@@ -36,7 +37,7 @@ app.use(function(err, req, res, next) {
 });
 
 // port config
-const port = 8000; // config variable
+const port = 8004; // config variable
 const server = http.Server(app);
 server.listen(port, function() {
   console.log('Server running on port: ' + port);
