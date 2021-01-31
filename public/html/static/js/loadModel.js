@@ -39,7 +39,7 @@ var storeAnno = [];
 
 var floorGroup = new xeogl.GLTFModel({
     id: "floors",
-    src: "/static/models/floor5.gltf",
+    src: "./static/models/floor5.gltf",
     scale: [.001, .001, .001],
     edgeThreshold: 20,
     opacity: 0.9,
@@ -61,7 +61,7 @@ var floorGroup = new xeogl.GLTFModel({
 
 var env = new xeogl.GLTFModel({
     id: "hopson-env",
-    src: "/static/models/env.gltf",
+    src: "./static/models/env.gltf",
     scale: [.001, .001, .001],
     // edgeThreshold: 50,
     edges: false,
@@ -87,7 +87,7 @@ var env = new xeogl.GLTFModel({
 
 var storeGroup = new xeogl.GLTFModel({
     id: "storeGroup",
-    src: "/static/models/stores4.gltf",
+    src: "./static/models/stores4.gltf",
     scale: [.001, .001, .001],
     edgeThreshold: 0,
     opacity: 0.2,
@@ -111,7 +111,7 @@ var storeGroup = new xeogl.GLTFModel({
 
 var cameraGroup = new xeogl.GLTFModel({
     id: "cameraGroup",
-    src: "/static/models/cameras.gltf",
+    src: "./static/models/camera.gltf",
     scale: [.001, .001, .001],
     edgeThreshold: 20,
     opacity: 0.4,
