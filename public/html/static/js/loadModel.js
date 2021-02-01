@@ -43,6 +43,7 @@ var floorGroup = new xeogl.GLTFModel({
     scale: [.001, .001, .001],
     edgeThreshold: 20,
     opacity: 0.9,
+    visible: true,
     handleNode: (function(nodeInfo, actions) {
         var objectCount = 0;
         return function (nodeInfo, actions) {
@@ -68,6 +69,7 @@ var env = new xeogl.GLTFModel({
     outlined: false,
     pickable: false,
     ghosted: true,
+    visible:false,
     handleNode: (function(nodeInfo, actions) {
         var objectCount = 0;
         // console.log(nodeInfo.name);
@@ -99,11 +101,11 @@ var storeGroup = new xeogl.GLTFModel({
             id: nodeInfo.name,
         };
         return function (nodeInfo, actions) {
-        //     // if (nodeInfo.mesh !== undefined) { // Node has a mesh
-        //         actions.createObject = {
-        //             id: nodeInfo.name,
-        //         };
-        //     // }
+            if (nodeInfo.mesh !== undefined) { // Node has a mesh
+                actions.createObject = {
+                    id: nodeInfo.name,
+                };
+            }
             return true;
         };
     })
@@ -132,90 +134,46 @@ var cameraGroup = new xeogl.GLTFModel({
 });
 
 storeGroup.on("loaded", function(){
-    // When each annotation's pin is clicked, we'll show the annotation's label 
-
-    // triggered when hitting camera pin
-    // function pinClicked(hit) {
-    //     // annotation.labelShown = !annotation.labelShown;
-    //     // if (lastAnnotation) {
-    //     //     lastAnnotation.labelShown = false;
-    //     // }
-    //     annotation = hit.mesh.id
-    //     path = '/static/screenshot/' + annotation + '.png'
-    //     var img = document.createElement('img');
-    //     // var canvas = document.querySelector('#photo');
-    //     var canvas = $('#camera-info', parent.document)
-    //     img.setAttribute('id', annotation);
-    //     img.setAttribute('alt', 'camera photo missing')
-    //     img.setAttribute('class', 'camera-image');
-    //     img.setAttribute('height', '100');
-    //     img.setAttribute('src', path);
-
-    //     canvas.empty();
-    //     canvas.append(`<h2 id="first-level-title">Camera Information</h2>`)
-    //     canvas.append(img);
-    //     canvas.append(`<p id="second-level-title">Other information below: floor level; resolution; some overall stats from processing</p>`)
-    //     // console.log(`${annotation} clicked`)
-    //     lastAnnotation = annotation;
-    // }
-    
-    // // ---------------------------- for camera information annotation
-    // cameras.forEach(camera_id => {
-    //     var temp_anno = new xeogl.Annotation(scene, {
-    //         mesh: cameraGroup.objects[camera_id],
-    //         id: "Anno"+ camera_id,
-    //         bary: [0.33, 0.33, 0.33],
-    //         occludable: true,
-    //         glyph: camera_id,
-    //         desc: 'Text Description Goes Here',
-    //         title: "Camera-" + camera_id,
-    //         pinShown: true,
-    //         labelShown: false
-    //     });
-    //     // temp_anno.on("pinClicked", pinClicked);
-    // })
-
-    //---------------------------- for store information annotation
-    console.log(storeGroup.objects)
     for (const [key, value] of Object.entries(storeGroup.objects)) {
         stores.push(key)
     }
+    // console.log(stores)
 })
 
 floorGroup.on("loaded", function () {
     cameraControl.on('picked', function(hit){
-        // console.log(hit.mesh._aabbCenter[1])
         picked_center = hit.mesh._aabbCenter[1]
-        console.log(picked_center);
+        // console.log(picked_center);
         // ------ for store
         if (stores.includes(hit.mesh.id)) {
             lastStore = object;            
             // do other things for store
         }
         for (const [key, value] of Object.entries(floorGroup.meshes)) {
-            if (value._aabbCenter[1] > picked_center)
+            if (value._aabbCenter[1] - picked_center>=3)
             {
                 value.position = [0, 120000, 0];
-                // value.translateY(20000); // (X,Y,Z)
+                picked_center = hit.mesh._aabbCenter[1]
             }
             else{
                 value.position = [0, 0, 0];
+                picked_center = hit.mesh._aabbCenter[1]
             }
         }
-
         currentFloorStores = []
         storeAnno.forEach(storeA => {
             storeA.destroy();
-            // Object.entries(storeAnno);
-            currentFloorStores.push(storeA.id)
-
         })
         storeAnno = []
         stores.forEach(store_id => {
-            if (storeGroup.objects[store_id]._aabbCenter[1] > picked_center - 5 && storeGroup.objects[store_id]._aabbCenter[1] < picked_center + 2){
-                // console.log('a', storeGroup.objects[store_id]._aabbCenter[1], picked_center);
-                // console.log(storeGroup.objects[store_id]);
+            // console.log('1',picked_center)
+            // console.log('2',storeGroup.objects[store_id]._aabbCenter[1])
+            // console.log('1-2: ', Math.abs(storeGroup.objects[store_id]._aabbCenter[1] - picked_center))
+            if (Math.abs(storeGroup.objects[store_id]._aabbCenter[1] - picked_center)<=2){
+                console.log('1',picked_center)
                 storeGroup.objects[store_id].visible = true;
+                deltaY=storeGroup.objects[store_id].position[1];
+                storeGroup.objects[store_id].position = [0,deltaY+10,0];
                 var store = new xeogl.Annotation(scene, {
                     mesh: storeGroup.objects[store_id], 
                     id: "Anno"+ store_id,
@@ -227,9 +185,12 @@ floorGroup.on("loaded", function () {
                     labelShown: false
                 });
                 storeAnno.push(store)
+                currentFloorStores.push(store_id) // get store id on the selected floor
             }
-            else{storeGroup.objects[store_id].visible = false;}
+            else{
+                storeGroup.objects[store_id].visible = false;}
         })
+        // console.log('current floor:',currentFloorStores);
     })
 
     cameraControl.on("hoverEnter", function (hit) {     
@@ -237,7 +198,7 @@ floorGroup.on("loaded", function () {
         if (stores.includes(hit.mesh.id)) {
             object = scene.components['Anno'+ hit.mesh.id];
             object.mesh.aabbVisible = true;
-            object.labelShown = !object.labelShown;
+            object.labelShown = true;
             // do other things for store
         }
     });
@@ -248,14 +209,34 @@ floorGroup.on("loaded", function () {
             object = scene.components['Anno'+ hit.mesh.id];
             object.mesh.aabbVisible = false;
             object.colorize = [1.0, 0, 0];
-            object.labelShown = !object.labelShown;
+            object.labelShown = false;
             // do other things for store
         }
     });
 
+    var selected_store=''
+    var lastStore_id;
+    cameraControl.on("picked", function (hit) {     
+        if (currentFloorStores.includes(hit.mesh.id)) {
+            if (lastStore_id){
+                console.log('lastStore_id',lastStore_id)
+                storeGroup.meshes[lastStore_id].opacity=0.2
+            }
+            selected_store=hit.mesh.id
+            // console.log('selected: ', selected_store)
+            
+            hit.mesh.opacity=1
+            lastStore_id=hit.mesh.id
+        }
+        // lastStore_id=hit.mesh.id
+        console.log('lastStore_id1',lastStore_id)
+    });
+    
     // if clicked on nothing, zoom to the full model
     cameraControl.on("pickedNothing", function (hit) {
-        cameraFlight.flyTo(model);
+        if (lastStore_id){
+            storeGroup.meshes[lastStore_id].opacity=0.2
+        }
     });
 
  });
