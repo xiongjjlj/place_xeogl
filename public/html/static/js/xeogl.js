@@ -25756,7 +25756,7 @@ componentClasses[type$20] = OutlineMaterial;
  @param [cfg] Scene parameters
  @param [cfg.id] {String} Optional ID, unique among all Scenes in xeogl, generated automatically when omitted.
  @param [cfg.meta] {String:Object} Optional map of user-defined metadata to attach to this Scene.
- @param [cfg.canvasId] {String} ID of existing HTML5 canvas in the DOM - creates a full-page canvas automatically if this is omitted
+ @param [cfg.canvas] {String} ID of existing HTML5 canvas in the DOM - creates a full-page canvas automatically if this is omitted
  @param [cfg.webgl2=true] {Boolean} Set this false when we **don't** want to use WebGL 2 for our Scene; the Scene will fall
  back on WebGL 1 if not available. This property will be deprecated when WebGL 2 is supported everywhere.
  @param [cfg.components] {Array(Object)} JSON array containing parameters for {{#crossLink "Component"}}Component{{/crossLink}} subtypes to immediately create within the Scene.

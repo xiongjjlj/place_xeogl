@@ -17,7 +17,14 @@
         <script src="./static/js/dat.gui.min.js"></script>
         <script src="./static/js/pin.js"></script>
         <script src="./static/js/annotation.js"></script>
-        <link href="./static/css/annotation-style.css" rel="stylesheet"/>
+
+        <script src="/static/js/moment.js"></script>
+        <script src="/static/js/moment-with-locales.js"></script>
+        <script src="/static/js/daterangepicker.js"></script>
+
+        <script src="/static/js/dist/apexcharts.amd.js"></script>
+        <script src="/static/js/dist/apexcharts.js"></script>
+        <script src="/static/js/dist/apexcharts.min.js"></script>
     
         <script src="./static/js/showdown.min.js"></script>
         <script src="./static/js/story.js"></script>
@@ -26,9 +33,10 @@
         <link src = './static/css/annotation.css' rel="stylesheet"/>
         <link href="./static/css/styles.css" rel="stylesheet"/>
         <link href="./static/css/panel.css" rel="stylesheet"/>
+        <link href="./static/css/annotation-style.css" rel="stylesheet"/>
+        <link href="/static/css/daterangepicker.css" rel="stylesheet"/> 
     </head>
     <body>
-        <script src='./static/js/loadModel.js'></script>
         <div class="panel panel-default" id="left-panel-container">
           <div class="container-fluid" id="panel-body">
             <div class="row" style="height: 45%; padding-bottom: 15px">
@@ -55,6 +63,9 @@
         <div class="timeline" style="color:white">
             timeline
         </div>
+
+        <script src='./static/js/loadModel.js'></script>
+        <script src='./static/js/interactivity.js'></script>
 
     </body>
 </html>

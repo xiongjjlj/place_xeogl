@@ -25,14 +25,46 @@ floorOrder = {
 
 var currentFloorStoreAnno = [];
 
+//create scenen object
 var scene = new xeogl.Scene({
+    // canvas:'myCanvas',
     transparent: false,
     backgroundColor: [0.125, 0.125, 0.125]
 });
 
 xeogl.setDefaultScene(scene);
 
-var storeAnno = [];
+
+//----------------------------------------------------------------------------------------------------
+// Camera
+//----------------------------------------------------------------------------------------------------
+
+var camera = scene.camera;
+var lastStore;
+var lastAnnotation;
+var selected_store=''
+var lastStore_id;
+
+camera.eye = [100, 100, -100];
+camera.look = [150, 7, -170];
+camera.up = [0,1,0];
+camera.projection = "ortho";
+
+var cameraControl = new xeogl.CameraControl({
+    doublePickFlyTo: false
+});
+
+var cameraFlight = new xeogl.CameraFlightAnimation();
+
+scene.highlightMaterial.fillAlpha = 1;
+scene.highlightMaterial.edgeAlpha = 0.6;
+scene.highlightMaterial.edgeColor = [0, 0, 0];
+scene.highlightMaterial.edgeWidth = 2;
+
+var lastEntity = null;
+var lastColorize = null;
+var input = scene.input;
+
 //---------------------------------------------------
 // Load the model
 //---------------------------------------------------
@@ -47,7 +79,6 @@ var floorGroup = new xeogl.GLTFModel({
     handleNode: (function(nodeInfo, actions) {
         var objectCount = 0;
         return function (nodeInfo, actions) {
-            console.log(nodeInfo);
             if (nodeInfo.mesh !== undefined) { // Node has a mesh
                 console.log(nodeInfo.name)
 
@@ -72,16 +103,10 @@ var env = new xeogl.GLTFModel({
     visible:false,
     handleNode: (function(nodeInfo, actions) {
         var objectCount = 0;
-        // console.log(nodeInfo.name);
         actions.createObject = {
             id: nodeInfo.name,
         };
         return function (nodeInfo, actions) {
-        //     if (nodeInfo.mesh !== undefined) { // Node has a mesh
-                // actions.createObject = {
-                //     id: nodeInfo.name,
-                // };
-        //     }
             return true;
         };
     })
@@ -96,7 +121,6 @@ var storeGroup = new xeogl.GLTFModel({
     visible: false,
     handleNode: (function(nodeInfo, actions) {
         var objectCount = 0;
-        // console.log(nodeInfo.name);
         actions.createObject = {
             id: nodeInfo.name,
         };
@@ -120,7 +144,6 @@ var cameraGroup = new xeogl.GLTFModel({
     visible: false,
     handleNode: (function(nodeInfo, actions) {
         var objectCount = 0;
-        // console.log(nodeInfo.name);
         return function (nodeInfo, actions) {
             // if (nodeInfo.mesh !== undefined) { // Node has a mesh
                 console.log(nodeInfo.name)
@@ -137,18 +160,12 @@ storeGroup.on("loaded", function(){
     for (const [key, value] of Object.entries(storeGroup.objects)) {
         stores.push(key)
     }
-    // console.log(stores)
+
 })
 
 floorGroup.on("loaded", function () {
     cameraControl.on('picked', function(hit){
         picked_center = hit.mesh._aabbCenter[1]
-        // console.log(picked_center);
-        // ------ for store
-        if (stores.includes(hit.mesh.id)) {
-            lastStore = object;            
-            // do other things for store
-        }
         for (const [key, value] of Object.entries(floorGroup.meshes)) {
             if (value._aabbCenter[1] - picked_center>=3)
             {
@@ -160,24 +177,21 @@ floorGroup.on("loaded", function () {
                 picked_center = hit.mesh._aabbCenter[1]
             }
         }
-        currentFloorStores = []
         storeAnno.forEach(storeA => {
             storeA.destroy();
         })
         storeAnno = []
+        currentFloorStores=[]
         stores.forEach(store_id => {
-            // console.log('1',picked_center)
-            // console.log('2',storeGroup.objects[store_id]._aabbCenter[1])
-            // console.log('1-2: ', Math.abs(storeGroup.objects[store_id]._aabbCenter[1] - picked_center))
             if (Math.abs(storeGroup.objects[store_id]._aabbCenter[1] - picked_center)<=2){
-                console.log('1',picked_center)
+                // console.log('1',picked_center)
                 storeGroup.objects[store_id].visible = true;
                 deltaY=storeGroup.objects[store_id].position[1];
                 storeGroup.objects[store_id].position = [0,deltaY+10,0];
                 var store = new xeogl.Annotation(scene, {
                     mesh: storeGroup.objects[store_id], 
                     id: "Anno"+ store_id,
-                    bary: [0.33, 0.33, 0.33],
+                    bary: [0.3, 0.3, 0.3],
                     occludable: true,
                     glyph: store_id,
                     desc: 'Store ID: ' + store_id,
@@ -191,87 +205,65 @@ floorGroup.on("loaded", function () {
                 storeGroup.objects[store_id].visible = false;}
         })
         // console.log('current floor:',currentFloorStores);
+        // export {currentFloorStores};
     })
-
-    cameraControl.on("hoverEnter", function (hit) {     
-        // ------ for store
-        if (stores.includes(hit.mesh.id)) {
-            object = scene.components['Anno'+ hit.mesh.id];
-            object.mesh.aabbVisible = true;
-            object.labelShown = true;
-            // do other things for store
-        }
-    });
-
-    cameraControl.on("hoverOut", function (hit) {
-        // ------ for store
-        if (stores.includes(hit.mesh.id)) {
-            object = scene.components['Anno'+ hit.mesh.id];
-            object.mesh.aabbVisible = false;
-            object.colorize = [1.0, 0, 0];
-            object.labelShown = false;
-            // do other things for store
-        }
-    });
-
-    var selected_store=''
-    var lastStore_id;
-    cameraControl.on("picked", function (hit) {     
-        if (currentFloorStores.includes(hit.mesh.id)) {
-            if (lastStore_id){
-                console.log('lastStore_id',lastStore_id)
-                storeGroup.meshes[lastStore_id].opacity=0.2
-            }
-            selected_store=hit.mesh.id
-            // console.log('selected: ', selected_store)
-            
-            hit.mesh.opacity=1
-            lastStore_id=hit.mesh.id
-        }
-        // lastStore_id=hit.mesh.id
-        console.log('lastStore_id1',lastStore_id)
-    });
     
-    // if clicked on nothing, zoom to the full model
-    cameraControl.on("pickedNothing", function (hit) {
+cameraControl.on("hoverEnter", function (hit) {     
+    // ------ for store
+    if (stores.includes(hit.mesh.id)) {
+        mesh=scene.components[hit.mesh.id];
+        object = scene.components['Anno'+ hit.mesh.id];
+        console.log('anno pos1', object.canvasPos)
+        // console.log('mesh pos ', mesh._aabbCenter)
+        console.log('anno pos2', object.canvasPos)
+        
+
+        object.mesh.aabbVisible = true;
+        object.labelShown = true;
+        // do other things for store
+    }
+});
+
+cameraControl.on("hoverOut", function (hit) {
+    // ------ for store
+    if (stores.includes(hit.mesh.id)) {
+        object = scene.components['Anno'+ hit.mesh.id];
+        object.mesh.aabbVisible = false;
+        object.colorize = [1.0, 0, 0];
+        object.labelShown = false;
+        // do other things for store
+    }
+});
+
+cameraControl.on("picked", function (hit) {     
+    if (currentFloorStores.includes(hit.mesh.id)) {
         if (lastStore_id){
+            // console.log('lastStore_id',lastStore_id)
             storeGroup.meshes[lastStore_id].opacity=0.2
         }
-    });
-
- });
-
-//----------------------------------------------------------------------------------------------------8888/?token=69b283d81ae744ef15f9e1c96faf3c22d73ab67df83bcc49-
-// Camera
-//-----------------------------------------------------------------------------------------------------
-
-var camera = scene.camera;
-var lastStore;
-var lastAnnotation;
-
-camera.eye = [100, 100, -100];
-camera.look = [150, 7, -170];
-camera.up = [0,1,0];
-camera.projection = "ortho";
-
-var cameraControl = new xeogl.CameraControl({
-    doublePickFlyTo: false
+        selected_store=hit.mesh.id
+        // console.log('selected: ', selected_store)
+        
+        hit.mesh.opacity=1
+        lastStore_id=hit.mesh.id
+    }
+    // lastStore_id=hit.mesh.id
+    // console.log('lastStore_id1',lastStore_id)
+    // export {selected_store};
+});
+    
+cameraControl.on("pickedNothing", function (hit) {
+    // if (lastStore_id){
+    //     storeGroup.meshes[lastStore_id].opacity=0.2
+    // }
+});
 });
 
-var cameraFlight = new xeogl.CameraFlightAnimation();
 
-scene.highlightMaterial.fillAlpha = 1;
-scene.highlightMaterial.edgeAlpha = 0.6;
-scene.highlightMaterial.edgeColor = [0, 0, 0];
-scene.highlightMaterial.edgeWidth = 2;
 
-var lastEntity = null;
-var lastColorize = null;
-var input = scene.input;
-
-env.on("loaded", function () {
-    // env.ghosted = false;
-});
+// env.on("loaded", function () {
+//     // env.ghosted = false;
+// });
 
 //-----------------------model.on-------------------------------------
 
