@@ -56,13 +56,13 @@
         this.alwaysShowCalendars = false;
         this.ranges = {};
 
-        this.opens = 'right';
-        if (this.element.hasClass('pull-right'))
-            this.opens = 'left';
+        this.opens = 'left';
+        if (this.element.hasClass('pull-left'))
+            this.opens = 'right';
 
-        this.drops = 'down';
-        if (this.element.hasClass('dropup'))
-            this.drops = 'up';
+        this.drops = 'up';
+        if (this.element.hasClass('dropdown'))
+            this.drops = 'down';
 
         this.buttonClasses = 'btn btn-sm';
         this.applyButtonClasses = 'btn-primary';

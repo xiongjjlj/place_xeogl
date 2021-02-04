@@ -42,8 +42,9 @@ xeogl.setDefaultScene(scene);
 var camera = scene.camera;
 var lastStore;
 var lastAnnotation;
-var selected_store=''
+var selected_store;
 var lastStore_id;
+const scale=0.001
 
 camera.eye = [100, 100, -100];
 camera.look = [150, 7, -170];
@@ -72,7 +73,7 @@ var input = scene.input;
 var floorGroup = new xeogl.GLTFModel({
     id: "floors",
     src: "./static/models/floor5.gltf",
-    scale: [.001, .001, .001],
+    scale: [scale, scale, scale],
     edgeThreshold: 20,
     opacity: 0.9,
     visible: true,
@@ -94,7 +95,7 @@ var floorGroup = new xeogl.GLTFModel({
 var env = new xeogl.GLTFModel({
     id: "hopson-env",
     src: "./static/models/env.gltf",
-    scale: [.001, .001, .001],
+    scale: [scale, scale, scale],
     // edgeThreshold: 50,
     edges: false,
     outlined: false,
@@ -115,7 +116,7 @@ var env = new xeogl.GLTFModel({
 var storeGroup = new xeogl.GLTFModel({
     id: "storeGroup",
     src: "./static/models/stores4.gltf",
-    scale: [.001, .001, .001],
+    scale: [scale, scale, scale],
     edgeThreshold: 0,
     opacity: 0.2,
     visible: false,
@@ -138,7 +139,7 @@ var storeGroup = new xeogl.GLTFModel({
 var cameraGroup = new xeogl.GLTFModel({
     id: "cameraGroup",
     src: "./static/models/camera.gltf",
-    scale: [.001, .001, .001],
+    scale: [scale, scale, scale],
     edgeThreshold: 20,
     opacity: 0.4,
     visible: false,
@@ -161,37 +162,43 @@ storeGroup.on("loaded", function(){
         stores.push(key)
     }
 
-})
+});
 
-floorGroup.on("loaded", function () {
+// initial_centers={};
+floorGroup.on("loaded", function(){
+    console.log('model loaded')
     cameraControl.on('picked', function(hit){
-        picked_center = hit.mesh._aabbCenter[1]
+        picked_center = hit.mesh._aabbCenter[1];
+        var dist=120000
         for (const [key, value] of Object.entries(floorGroup.meshes)) {
-            if (value._aabbCenter[1] - picked_center>=3)
+            if (value._aabbCenter[1] > picked_center)
             {
-                value.position = [0, 120000, 0];
-                picked_center = hit.mesh._aabbCenter[1]
+                value.position = [0, dist, 0];
             }
             else{
+                init=picked_center
                 value.position = [0, 0, 0];
-                picked_center = hit.mesh._aabbCenter[1]
             }
         }
+        
         storeAnno.forEach(storeA => {
             storeA.destroy();
         })
         storeAnno = []
         currentFloorStores=[]
         stores.forEach(store_id => {
+    
+            if (picked_center>100){
+                picked_center=picked_center-dist*scale
+            }
             if (Math.abs(storeGroup.objects[store_id]._aabbCenter[1] - picked_center)<=2){
-                // console.log('1',picked_center)
                 storeGroup.objects[store_id].visible = true;
                 deltaY=storeGroup.objects[store_id].position[1];
                 storeGroup.objects[store_id].position = [0,deltaY+10,0];
                 var store = new xeogl.Annotation(scene, {
                     mesh: storeGroup.objects[store_id], 
                     id: "Anno"+ store_id,
-                    bary: [0.3, 0.3, 0.3],
+                    bary: [0.33, 0.33, 0.33],
                     occludable: true,
                     glyph: store_id,
                     desc: 'Store ID: ' + store_id,
@@ -201,39 +208,41 @@ floorGroup.on("loaded", function () {
                 storeAnno.push(store)
                 currentFloorStores.push(store_id) // get store id on the selected floor
             }
+            
             else{
                 storeGroup.objects[store_id].visible = false;}
         })
-        // console.log('current floor:',currentFloorStores);
-        // export {currentFloorStores};
-    })
     
-cameraControl.on("hoverEnter", function (hit) {     
-    // ------ for store
-    if (stores.includes(hit.mesh.id)) {
-        mesh=scene.components[hit.mesh.id];
-        object = scene.components['Anno'+ hit.mesh.id];
-        console.log('anno pos1', object.canvasPos)
-        // console.log('mesh pos ', mesh._aabbCenter)
-        console.log('anno pos2', object.canvasPos)
-        
+    })
+});
 
-        object.mesh.aabbVisible = true;
-        object.labelShown = true;
-        // do other things for store
-    }
+
+
+cameraControl.on("hoverEnter", function (hit) {     
+// ------ for store
+if (stores.includes(hit.mesh.id)) {
+    mesh=scene.components[hit.mesh.id];
+    object = scene.components['Anno'+ hit.mesh.id];
+    // console.log('anno pos1', object.canvasPos)
+    // console.log('mesh pos ', mesh._aabbCenter)
+    // console.log('anno pos2', object.canvasPos)
+    
+
+    object.mesh.aabbVisible = true;
+    object.labelShown = true;
+    // do other things for store
+}
 });
 
 cameraControl.on("hoverOut", function (hit) {
-    // ------ for store
-    if (stores.includes(hit.mesh.id)) {
-        object = scene.components['Anno'+ hit.mesh.id];
-        object.mesh.aabbVisible = false;
-        object.colorize = [1.0, 0, 0];
-        object.labelShown = false;
-        // do other things for store
-    }
-});
+// ------ for store
+if (stores.includes(hit.mesh.id)) {
+    object = scene.components['Anno'+ hit.mesh.id];
+    object.mesh.aabbVisible = false;
+    object.colorize = [1.0, 0, 0];
+    object.labelShown = false;
+    // do other things for store
+}
 
 cameraControl.on("picked", function (hit) {     
     if (currentFloorStores.includes(hit.mesh.id)) {

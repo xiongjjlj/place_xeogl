@@ -17,10 +17,29 @@
     border-radius: .45rem;
 }
 
-.timeline{
+/* .timeline{
 	position: absolute;
-	left: 500px;
-	bottom: 20px;
+	left: 1500px;
+	bottom: 100px;
 	right: 40px;
 	height: 30px;
+} */
+
+#right-panel-container{
+	right:0;
+	bottom: 0;
+	position: absolute;
+	padding: 20px 40px 20px 40px;
+	height: 10%;
+	width: 300px;
+}
+
+#datetime-body{
+	width: 100%;
+	height: 100%;
+	padding: 15px;
+	background-color: rgba(0,0,0, 0.8);
+    background-clip: border-box;
+    border: 1px solid rgba(100,100,100,0.5);
+    border-radius: .45rem;
 }
