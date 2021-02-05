@@ -21,9 +21,16 @@ floorOrder = {
     'L4': 4,
     'L5': 5,
     'L6': 6
+    '_797': 'L3',
+    '_796': 'L2',
+    '_795': 'L1',
+    '_802': 'B1',
+    '_803': 'B2'
 }
 
-var currentFloorStoreAnno = [];
+var stores = [];
+var currentFloorStores = [];
+var storeAnno = [];
 
 //create scenen object
 var scene = new xeogl.Scene({
@@ -115,7 +122,7 @@ var env = new xeogl.GLTFModel({
 
 var storeGroup = new xeogl.GLTFModel({
     id: "storeGroup",
-    src: "./static/models/stores4.gltf",
+    src: "./static/models/stores.gltf",
     scale: [scale, scale, scale],
     edgeThreshold: 0,
     opacity: 0.2,
@@ -168,6 +175,7 @@ storeGroup.on("loaded", function(){
 floorGroup.on("loaded", function(){
     console.log('model loaded')
     cameraControl.on('picked', function(hit){
+        console.log(hit.mesh.id)
         picked_center = hit.mesh._aabbCenter[1];
         var dist=120000
         for (const [key, value] of Object.entries(floorGroup.meshes)) {
@@ -191,10 +199,12 @@ floorGroup.on("loaded", function(){
             if (picked_center>100){
                 picked_center=picked_center-dist*scale
             }
-            if (Math.abs(storeGroup.objects[store_id]._aabbCenter[1] - picked_center)<=2){
+            // if (Math.abs(storeGroup.objects[store_id]._aabbCenter[1] - picked_center)<=3){
+            // console.log(store_id.slice(0,2))
+            if (store_id.slice(0,2)===id2floor[hit.mesh.id]){
                 storeGroup.objects[store_id].visible = true;
-                deltaY=storeGroup.objects[store_id].position[1];
-                storeGroup.objects[store_id].position = [0,deltaY+10,0];
+                // deltaY=storeGroup.objects[store_id].position[1];
+                // storeGroup.objects[store_id].position = [0,deltaY+10,0];
                 var store = new xeogl.Annotation(scene, {
                     mesh: storeGroup.objects[store_id], 
                     id: "Anno"+ store_id,

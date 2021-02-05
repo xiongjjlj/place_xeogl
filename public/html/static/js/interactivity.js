@@ -71,7 +71,9 @@ function loadRangeData(startDateTime,endDateTime,store_id){
             console.log('data requested!');
             console.log(data)
 
-            createRadarChart(data)
+            createRadarChart(data);
+            createDonutChart(data);
+            createCircBarChart(data);
         }
         else alert('fail loading data');
 
@@ -100,19 +102,20 @@ function createRadarChart(data){
 
     var options = {
         series: [{
-        name: 'Series 1',
-        data: [(enter_tot/passer_tot*100).toFixed(1), (exit_tot/passer_tot*100).toFixed(1), (watcher_tot/passer_tot*100).toFixed(1)],
+        name: '百分比',
+        data: [(enter_tot/passer_tot*100).toFixed(1), (exit_tot/passer_tot*100).toFixed(1), (watcher_tot/passer_tot*100).toFixed(1),
+                (100-(enter_tot/passer_tot*100).toFixed(1)-(exit_tot/passer_tot*100).toFixed(1)- (watcher_tot/passer_tot*100).toFixed(1)).toFixed(1)],
     }],
         chart: {
-        height: 320,
+        height: 300,
         type: 'radar',
     },
     dataLabels: {
-        enabled: true
+        enabled: false
     },
     plotOptions: {
         radar: {
-        size: 140,
+        size: 110,
         polygons: {
             strokeColors: '#e9e9e9',
             fill: {
@@ -122,28 +125,38 @@ function createRadarChart(data){
         }
     },
     title: {
-        text: '店铺评级'
+        text: '店铺评级',
+        style: {
+            color:'white'
+        },
     },
-    colors: ['#FF4560'],
+    colors: ['#FF0091'],
     markers: {
-        size: 4,
+        size: 2,
         colors: ['#fff'],
-        strokeColor: '#FF4560',
+        strokeColor: '#FF0091',
         strokeWidth: 2,
     },
-    // tooltip: {
-    //     y: {
-    //     formatter: function(val) {
-    //         return val
-    //     }
-    //     }
-    // },
+    tooltip: {
+        y: {
+        formatter: function(val) {
+            return val
+        }
+        }
+    },
+    tooltip: {
+        y: {
+        formatter: function(val) {
+            return val
+        }
+        }
+    },
     xaxis: {
-        categories: ['进客率(%)', '出客率(%)', '观望率(%)']
+        categories: ['进客率(%)', '出客率(%)', '观望率(%)','经过率(%)']
     },
     yaxis: {
         min: 0,
-        max: 50,
+        max: 100,
         tickAmount: 8,
         labels: {
         formatter: function(val, i) {
@@ -158,7 +171,152 @@ function createRadarChart(data){
     };
 
     var chart = new ApexCharts(document.querySelector("#radar-chart"), options);
-    chart.render();}
+    chart.render();
+};
+
+// donut Chart gender
+function createDonutChart(data){
+    $('#donut-chart').empty();
+
+    var enter_cnt=new Array();
+    var exit_cnt=new Array();
+    var watcher_cnt=new Array();
+    var passer_cnt=new Array();
+
+    data.forEach(d=> {
+        enter_cnt.push(parseInt(d.enter_cnt))
+        exit_cnt.push(parseInt(d.exit_cnt))
+        watcher_cnt.push(parseInt(d.watcher_cnt))
+        passer_cnt.push(parseInt(d.passer_cnt))
+    });
+
+    var enter_tot=enter_cnt.reduce(function(a,b){return a+b},0);
+    var exit_tot=exit_cnt.reduce(function(a,b){return a+b},0);
+    var passer_tot=passer_cnt.reduce(function(a,b){return a+b},0);
+    var watcher_tot=watcher_cnt.reduce(function(a,b){return a+b},0);
+
+    var options = {
+        series: [enter_tot,exit_tot,watcher_tot,passer_tot-enter_tot-exit_tot-watcher_tot],
+        chart: {
+        type: 'donut',
+        height: 200
+      },
+      dataLabels: {
+        enabled: false
+      },
+      tooltip: {
+        y: {
+        formatter: function(val) {
+            return (val*100/passer_tot).toFixed(1)
+        }
+        }
+    },
+      colors: ['#FFAB91', '#FF7D91', '#FF0091','#630063'],
+      labels:['进客率(%)', '出客率(%)', '观望率(%)','经过率(%)'],
+      legend: {
+        position: 'bottom',
+        fontSize:'10px',
+        labels: {
+            colors: 'white',
+            useSeriesColors: false
+        },
+      }
+      };
+
+      var chart = new ApexCharts(document.querySelector("#donut-chart"), options);
+      chart.render();
+}
+
+// circlular bar Chart body figure
+function createCircBarChart(data){
+    $('#circbar-chart').empty();
+
+    var enter_cnt=new Array();
+    var exit_cnt=new Array();
+    var watcher_cnt=new Array();
+    var passer_cnt=new Array();
+
+    data.forEach(d=> {
+        enter_cnt.push(parseInt(d.enter_cnt))
+        exit_cnt.push(parseInt(d.exit_cnt))
+        watcher_cnt.push(parseInt(d.watcher_cnt))
+        passer_cnt.push(parseInt(d.passer_cnt))
+    });
+
+    var enter_tot=enter_cnt.reduce(function(a,b){return a+b},0);
+    var exit_tot=exit_cnt.reduce(function(a,b){return a+b},0);
+    var passer_tot=passer_cnt.reduce(function(a,b){return a+b},0);
+    var watcher_tot=watcher_cnt.reduce(function(a,b){return a+b},0);
+
+    var options = {
+        series: [enter_tot/passer_tot*285, exit_tot/passer_tot*285, watcher_tot/passer_tot*285, (passer_tot-enter_tot-exit_tot-watcher_tot)/passer_tot*285],
+        chart: {
+        height: 200,
+        type: 'radialBar',
+      },
+      
+      plotOptions: {
+        radialBar: {
+          offsetY: 0,
+          startAngle: 0,
+          endAngle: 285,
+          hollow: {
+            margin: 5,
+            size: '30%',
+            background: 'transparent',
+            image: undefined,
+          },
+          dataLabels: {
+            name: {
+              show: false,
+            },
+            value: {
+              show: false,
+            }
+          }
+        }
+      },
+      colors: ['#FFAB91', '#FF7D91', '#FF0091','#630063'],
+      labels: ['进客人数', '出客人数', '观望人数', '经过人数'],
+      legend: {
+        show: true,
+        floating: true,
+        fontSize: '8px',
+        position: 'left',
+        // width: 100,
+        height: 100,
+        offsetX: -10,
+        offsetY: -10,
+        labels: {
+          colors:'white',
+          useSeriesColors: false,
+        },
+        markers: {
+            width:6,
+            height: 6,
+          },
+        formatter: function(seriesName, opts) {
+          return seriesName + ":  " + Math.round(opts.w.globals.series[opts.seriesIndex]/285*passer_tot)
+        },
+        itemMargin: {
+          vertical: -2
+        }
+      },
+      responsive: [{
+        breakpoint: 480,
+        options: {
+          legend: {
+              show: false
+          }
+        }
+      }]
+      };
+
+      var chart = new ApexCharts(document.querySelector("#circbar-chart"), options);
+      chart.render();
+}
+
+
 
 
 
