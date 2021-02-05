@@ -29,6 +29,7 @@ floorOrder = {
 }
 
 var stores = [];
+var floors= [];
 var currentFloorStores = [];
 var storeAnno = [];
 
@@ -173,57 +174,55 @@ storeGroup.on("loaded", function(){
 
 // initial_centers={};
 floorGroup.on("loaded", function(){
+
+    for (const [key, value] of Object.entries(floorGroup.objects)) {
+        floors.push(key)
+    }
+
     console.log('model loaded')
     cameraControl.on('picked', function(hit){
-        console.log(hit.mesh.id)
+        console.log('hit mesh: ',hit.mesh.id)
+    if (floors.includes(hit.mesh.id)){
         picked_center = hit.mesh._aabbCenter[1];
-        var dist=120000
-        for (const [key, value] of Object.entries(floorGroup.meshes)) {
-            if (value._aabbCenter[1] > picked_center)
-            {
-                value.position = [0, dist, 0];
+            for (const [key, value] of Object.entries(floorGroup.meshes)) {
+                if (value._aabbCenter[1] > picked_center)
+                {
+                    value.position = [0, 120000, 0];
+                }
+                else{
+                    init=picked_center
+                    value.position = [0, 0, 0];
+                }
             }
-            else{
-                init=picked_center
-                value.position = [0, 0, 0];
-            }
+            storeAnno.forEach(storeA => {
+                storeA.destroy();
+            })
+            storeAnno = []
+            currentFloorStores=[]
+            stores.forEach(store_id => {
+    
+                if (store_id.slice(0,2)==id2floor[hit.mesh.id]){
+                    storeGroup.objects[store_id].visible = true;
+                    deltaY=storeGroup.objects[store_id].position[1];
+                    storeGroup.objects[store_id].position = [0,deltaY+10,0];
+                    var store = new xeogl.Annotation(scene, {
+                        mesh: storeGroup.objects[store_id], 
+                        id: "Anno"+ store_id,
+                        bary: [0.33, 0.33, 0.33],
+                        occludable: true,
+                        glyph: store_id,
+                        desc: 'Store ID: ' + store_id,
+                        pinShown: false,
+                        labelShown: false
+                    });
+                    storeAnno.push(store)
+                    currentFloorStores.push(store_id) // get store id on the selected floor
+                }
+                else{
+                    storeGroup.objects[store_id].visible = false;}
+            })
         }
-        
-        storeAnno.forEach(storeA => {
-            storeA.destroy();
-        })
-        storeAnno = []
-        currentFloorStores=[]
-        stores.forEach(store_id => {
-    
-            if (picked_center>100){
-                picked_center=picked_center-dist*scale
-            }
-            if (Math.abs(storeGroup.objects[store_id]._aabbCenter[1] - picked_center)<=3){
-                storeGroup.objects[store_id].visible = true;
-                deltaY=storeGroup.objects[store_id].position[1];
-                storeGroup.objects[store_id].position = [0,deltaY+10,0];
-                var store = new xeogl.Annotation(scene, {
-                    mesh: storeGroup.objects[store_id], 
-                    id: "Anno"+ store_id,
-                    bary: [0.33, 0.33, 0.33],
-                    occludable: true,
-                    glyph: store_id,
-                    desc: 'Store ID: ' + store_id,
-                    pinShown: false,
-                    labelShown: false
-                });
-                storeAnno.push(store)
-                currentFloorStores.push(store_id) // get store id on the selected floor
-            }
-            
-            else{
-                storeGroup.objects[store_id].visible = false;}
-        })
-    
     })
-});
-
 
 
     cameraControl.on("hoverEnter", function (hit) {     
@@ -231,15 +230,10 @@ floorGroup.on("loaded", function(){
     if (stores.includes(hit.mesh.id)) {
         mesh=scene.components[hit.mesh.id];
         object = scene.components['Anno'+ hit.mesh.id];
-        // console.log('anno pos1', object.canvasPos)
-        // console.log('mesh pos ', mesh._aabbCenter)
-        // console.log('anno pos2', object.canvasPos)
-        
-
         object.mesh.aabbVisible = true;
         object.labelShown = true;
         // do other things for store
-    }
+        }
     });
 
     cameraControl.on("hoverOut", function (hit) {
@@ -250,24 +244,20 @@ floorGroup.on("loaded", function(){
         object.colorize = [1.0, 0, 0];
         object.labelShown = false;
         // do other things for store
-    }
+        }
     });
 
     cameraControl.on("picked", function (hit) {     
-        if (currentFloorStores.includes(hit.mesh.id)) {
-            if (lastStore_id){
-                // console.log('lastStore_id',lastStore_id)
-                storeGroup.meshes[lastStore_id].opacity=0.2
+        if(stores.includes(hit.mesh.id)){
+            if (currentFloorStores.includes(hit.mesh.id)) {
+                if (lastStore_id){
+                    storeGroup.meshes[lastStore_id].opacity=0.2
+                }
+                selected_store=hit.mesh.id
+                hit.mesh.opacity=1
+                lastStore_id=hit.mesh.id
             }
-            selected_store=hit.mesh.id
-            // console.log('selected: ', selected_store)
-            
-            hit.mesh.opacity=1
-            lastStore_id=hit.mesh.id
-        }
-        // lastStore_id=hit.mesh.id
-        // console.log('lastStore_id1',lastStore_id)
-        // export {selected_store};
+        }     
     });
     
     cameraControl.on("pickedNothing", function (hit) {
@@ -275,3 +265,4 @@ floorGroup.on("loaded", function(){
         //     storeGroup.meshes[lastStore_id].opacity=0.2
         // }
     });
+});

@@ -49,17 +49,17 @@ $('#datetime-body').on('apply.daterangepicker',function(){
 
 floorGroup.on('loaded',function(){
     cameraControl.on("picked", function (hit) {  
+    if(stores.includes(hit.mesh.id)){
         stores_sel=currentFloorStores;
-        if  (stores_sel.includes(hit.mesh.id)){
-            store_id_sel=hit.mesh.id
+            if  (stores_sel.includes(hit.mesh.id)){
+                store_id_sel=hit.mesh.id
+            }
+            if (store_id_sel){
+                loadRangeData(startDateTime,endDateTime,'玩塾');
+            }
         }
-        
-        if (store_id_sel){
-            loadRangeData(startDateTime,endDateTime,'玩塾');
-        }
-        // console.log('called!',store_id_sel);
-    });
-})
+    })
+});
 
 function loadRangeData(startDateTime,endDateTime,store_id){
 
