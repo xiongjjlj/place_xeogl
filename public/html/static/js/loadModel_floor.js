@@ -1,9 +1,11 @@
 // glabal variables
-
+const apisUrl='http://161.189.24.17:3005'
 var stores = [];
 var floors= [];
 var selected_floor;
 var lastfloor_id;
+var stores_on_floor=[]
+var display_data={}
 
 //create scenen object
 var scene = new xeogl.Scene({
@@ -82,9 +84,10 @@ floorGroup2.on("loaded", function(){
     for (const [key, value] of Object.entries(floorGroup2.objects)) {
         floors.push(key)
     }
-    cameraControl.on("hoverEnter", function (hit) {     
+    cameraControl.on("picked", function (hit) {     
         // ------ for store
         if (floors.includes(hit.mesh.id)) {
+            $('#panel-body1').empty()
             console.log(lastfloor_id)
             if (lastfloor_id){
                 floorGroup2.meshes[lastfloor_id].colorize=[1,1,1]
@@ -94,6 +97,24 @@ floorGroup2.on("loaded", function(){
             hit.mesh.colorize=[255,0,255]
             hit.mesh.opacity=0.5
             lastfloor_id=hit.mesh.id
+
+            // prepare the data for ranking bar chart
+            stores_on_floor=[]
+            display_data={}
+            $.post(apisUrl + '/get_store_id_of_one_floor_id', {'floor_id': id2fl[selected_floor]}, function(data, textStatus, jqXHR){
+                if (textStatus=='success'){
+                    data.forEach(function(d){
+                        stores_on_floor.push(d.store_name)
+                        $.post(apisUrl + '/get_store_kpis2', {'start_time': startDateTime, 'end_time': endDateTime, 'store_id': d.store_name}, function(data, textStatus){
+                            if(textStatus=='success'){
+                                display_data[d.store_name]=data
+                                // display_data.push(data)
+                            }
+                        })
+                    })
+                    console.log(display_data)
+                }
+            });
             }
         });
     
@@ -103,5 +124,7 @@ floorGroup2.on("loaded", function(){
             floorGroup2.meshes[lastfloor_id].colorize=[1,1,1]
             floorGroup2.meshes[lastfloor_id].opacity=1
         }
+        selected_floor=''
+        $('#panel-body1').empty()
         });
 });

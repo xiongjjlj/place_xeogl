@@ -24,12 +24,24 @@
 
         <script src="./static/js/dist/apexcharts.amd.js"></script>
         <script src="./static/js/dist/apexcharts.js"></script>
-        <script src="./static/js/dist/apexcharts.min.js"></script>
+        <script src="./static/js/dist/apexcharts.js"></script>
     
         <link href="./static/css/panel.css" rel="stylesheet"/>
         <link href="./static/css/annotation-style.css" rel="stylesheet"/>
         <link href="./static/css/daterangepicker.css" rel="stylesheet"/> 
         <link href="./static/css/apexcharts.css" rel="stylesheet"/> 
+
+        <style> 
+            #mySelect {
+                width: 80px;
+                height: 30px;
+                position: absolute;
+                left:50%;
+                border-radius: 6px;
+                transform: translate(-40px,0);
+            }
+        </style>
+
     </head>
     <body>
         <div class="panel panel-default" id="left-panel-container">
@@ -47,18 +59,20 @@
                         <div style="height: 100%; width: 100%; background: rgba(50,50,50,0.5); "></div>
                     </div>
                 </div>
-                <div class="row" style="height: 45%;">
+                <div class="row" style="height: 40%;">
                     <div class="col-12">
-                        <div id='bar-chart-gender' style="height: 100%; width: 100%; background: rgba(50,50,50,0.5);"></div>
+                        <div id='pie-chart' style="height: 100%; width: 100%; background: rgba(50,50,50,0.5);"></div>
+                        <div id='dropdown'></div>
                     </div>
                 </div>
+                
             </div>
         </div>
 
         <div class="panel panel-default" id="right-panel-container">
+            <br>
+            <br>
             <div class="container-fluid" id="datetime-body"></div>
-            <br> 
-            <div class="container-fluid" id="button-explode"></div> 
         </div>
 
         <script src='./static/js/loadModel_store.js'></script>

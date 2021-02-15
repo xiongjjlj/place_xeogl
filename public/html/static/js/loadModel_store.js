@@ -162,6 +162,8 @@ floorGroup.on("loaded", function(){
     cameraControl.on('picked', function(hit){
         // console.log('hit mesh: ',hit.mesh.id)
     if (floors.includes(hit.mesh.id)){
+        $('#bar-chart').empty();
+
         picked_center = hit.mesh._aabbCenter[1];
             for (const [key, value] of Object.entries(floorGroup.meshes)) {
                 if (value._aabbCenter[1] > picked_center)
@@ -182,7 +184,7 @@ floorGroup.on("loaded", function(){
     
                 if (store_id.slice(0,2)==id2floor[hit.mesh.id]){
                     storeGroup.objects[store_id].visible = true;
-                    if(Object.keys(booth2store).includes(store_id)){
+                    if(Object.keys(store_names).includes(store_id)){
                         storeGroup.objects[store_id].opacity=0.5
                     }
                     deltaY=storeGroup.objects[store_id].position[1];
@@ -230,7 +232,7 @@ floorGroup.on("loaded", function(){
     cameraControl.on("picked", function (hit) {
         if(stores.includes(hit.mesh.id)){
             if (currentFloorStores.includes(hit.mesh.id)) {
-                if (lastStore_id && Object.keys(booth2store).includes(lastStore_id)){
+                if (lastStore_id && Object.keys(store_names).includes(lastStore_id)){
                     storeGroup.meshes[lastStore_id].opacity=0.5
                 }
                 else if(lastStore_id){

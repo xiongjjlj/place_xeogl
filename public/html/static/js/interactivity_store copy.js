@@ -8,7 +8,6 @@ var booth2store={};
 var store_names={}
 var all_data_in_floor={}
 var cnt=0
-const color_platter= ['#630063','#FF0091','#FF7D91','#FFAB91','#bdbdbd'];
 
 const id2height={
     '_801': 720000,
@@ -24,8 +23,7 @@ const id2height={
 
 $('#datetime-body').append($('<input>',{
     placeholder:'选择日期时间: ',
-    class:'form-control',
-    id: 'input',
+    id: 'input'
 }));
 
 
@@ -36,15 +34,29 @@ $.post(apisUrl + '/get_available_date', function(data, textStatus, jqXHR){
                                          timePicker: true, 
                                          timePicker24Hour: true,
                                          alwaysShowCalendars: false})
+    // console.log(textStatus);
+    // console.log(data);
 });
 
 $.post(apisUrl + '/get_store_info', function(data, textStatus, jqXHR){
     console.log(textStatus);
     for (let i=0;i<data.length;i++){
         store_names[data[i].store_berth]=data[i].store_name
+        // store_names.push(data[i].store_name)
     }
     console.log('store_names', store_names);
 });
+
+storeGroup.on('loaded',function(){
+    stores.forEach(store_id=>{
+        if (Object.keys(store_names).includes(store_id)){
+            booth2store[store_id]=store_names[store_id];
+        }
+        else{booth2store[store_id]=null}
+    })
+    console.log('booth2store', booth2store)
+})
+    
 
   
 $('#datetime-body').on('apply.daterangepicker',function(){
@@ -53,7 +65,9 @@ $('#datetime-body').on('apply.daterangepicker',function(){
     $('#input').attr('placeholder', startDateTime+' - '+endDateTime);
     if (store_id_sel){
         loadRangeData(startDateTime,endDateTime,store_names[store_id_sel]);
+        createBarchart(all_data_in_floor)
     }
+    
 });
 
 floorGroup.on('loaded',function(){
@@ -65,13 +79,38 @@ floorGroup.on('loaded',function(){
             }
             if (store_id_sel){
                 loadRangeData(startDateTime,endDateTime,store_names[store_id_sel]);
-
-                
             }
         }
     console.log('all stores on floor ', currentFloorStores)
-    all_data_in_floor={}   
+    all_data_in_floor={}
+    
+    currentFloorStores.forEach(store=>{
+        // console.log(store)
+        if (Object.keys(store_names).includes(store)){
+            $.post(apisUrl + '/get_store_kpis2',{'start_time': startDateTime, 'end_time': endDateTime, 'store_id': booth2store[store]}, function(data, textStatus, jqXHR){
+                if (textStatus=='success'){
+                    all_data_in_floor[store]=data
+                }
+                else {alert('fail loading data')};
+            })
+        }
+        else{all_data_in_floor[store]=null}
+        // console.log(booth2store[store])
+        // console.log(all_data_in_floor)
+        cnt=cnt+1
     })
+    console.log(all_data_in_floor)    
+    })
+
+    $('#show-rank').on('click', function(){
+        // console.log('called!')
+        // console.log(all_data_in_floor)
+        if (cnt){
+            createBarchart(all_data_in_floor)
+        }
+        else{alert('pick a floor')}
+    });
+    
 });
 
 function loadRangeData(startDateTime,endDateTime,store_id){
@@ -87,7 +126,7 @@ function loadRangeData(startDateTime,endDateTime,store_id){
             createRadarChart(data);
             createDonutChart(data);
             createCircBarChart(data);
-            createPiechart(data);
+            // createBarchart(all_data_in_floor)
         }
         else alert('fail loading data');
 
@@ -130,12 +169,11 @@ function createRadarChart(data){
     },
     plotOptions: {
         radar: {
-        size:120,
+        size: 110,
         polygons: {
-            strokeColors: 'white',
-            strokeWidth: 0.5,
+            strokeColors: '#e9e9e9',
             fill: {
-            colors: ['rgba(255, 0, 145,0.3)','rgba(189,189,189,0.3)']
+            colors: ['#f8f8f8', '#fff']
             }
         }
         }
@@ -146,12 +184,12 @@ function createRadarChart(data){
             color:'white'
         },
     },
-    colors: ['white'],
+    colors: ['#FF0091'],
     markers: {
         size: 2,
-        colors: ['white'],
-        strokeColor: 'white',
-        strokeWidth: 4,
+        colors: ['#fff'],
+        strokeColor: '#FF0091',
+        strokeWidth: 2,
     },
     tooltip: {
         y: {
@@ -168,12 +206,7 @@ function createRadarChart(data){
         }
     },
     xaxis: {
-        categories: ['进客率(%)', '出客率(%)', '观望率(%)'],
-        labels:{
-            style:{
-                colors: 'white'
-            }
-        }  
+        categories: ['进客率(%)', '出客率(%)', '观望率(%)']
     },
     yaxis: {
         min: 0,
@@ -186,9 +219,6 @@ function createRadarChart(data){
             } else {
             return ''
             }
-        },
-        style:{
-            colors:'white'
         }
         }
     }
@@ -224,7 +254,7 @@ function createDonutChart(data){
         series: [enter_tot,exit_tot,watcher_tot],
         chart: {
         type: 'donut',
-        height: '100%'
+        height: 200
       },
       dataLabels: {
         enabled: false
@@ -239,12 +269,8 @@ function createDonutChart(data){
       colors: ['#FF7D91', '#FF0091','#630063'],
       labels:['进客率(%)', '出客率(%)', '观望率(%)'],
       legend: {
-        position: 'top',
-        fontSize:'8px',
-        markers: {
-            width:8,
-            height: 8,
-        },
+        position: 'bottom',
+        fontSize:'10px',
         labels: {
             colors: 'white',
             useSeriesColors: false
@@ -281,7 +307,7 @@ function createCircBarChart(data){
     var options = {
         series: [enter_tot/total*270, exit_tot/total*270, watcher_tot/total*270],
         chart: {
-        height: '100%',
+        height: 200,
         type: 'radialBar',
       },
       
@@ -346,179 +372,118 @@ function createCircBarChart(data){
       chart.render();
 }
 
-function dataWrangle(data){
+// create barchart
+function  createBarchart(data){
+    $('#bar-chart').empty();
+    
     var enter_cnt=new Array();
     var exit_cnt=new Array();
-    var female_cnt=new Array();
-    var male_cnt=new Array();
-    var age16minus_cnt=new Array();
-    var age17to30_cnt=new Array();
-    var age31to45_cnt=new Array();
-    var age46to60_cnt=new Array();
-    var age60plus_cnt=new Array();
-    var bodyfat_cnt=new Array();
-    var bodynormal_cnt=new Array();
-    var bodythin_cnt=new Array();
-    var baldhead_cnt=new Array();
-    var longhair_cnt=new Array();
-    var otherhair_cnt=new Array();
-    var blackhair_cnt=new Array();
-    var othercolorhair_cnt=new Array();
-    var withglasses_cnt=new Array();
-    var noglasses_cnt=new Array();
-    var hashat_cnt=new Array();
-    var nohat_cnt=new Array();
+    var watcher_cnt=new Array();
+    var all_stores=new Array();
+    // var passer_cnt=new Array();
 
-    data.forEach(d=> {
-        enter_cnt.push(parseInt(d.enter_cnt))
-        exit_cnt.push(parseInt(d.exit_cnt))
-        female_cnt.push(Math.round(parseInt(d.enter_cnt+d.exit_cnt)*d.female))
-        male_cnt.push(parseInt(d.enter_cnt+d.exit_cnt)-Math.round(parseInt(d.enter_cnt+d.exit_cnt)*d.female))
-        age16minus_cnt.push(Math.round(parseInt(d.enter_cnt+d.exit_cnt)*d.ageless16))
-        age17to30_cnt.push(Math.round(parseInt(d.enter_cnt+d.exit_cnt)*d.age17to30))
-        age31to45_cnt.push(Math.round(parseInt(d.enter_cnt+d.exit_cnt)*d.age31to45))
-        age46to60_cnt.push(Math.round(parseInt(d.enter_cnt+d.exit_cnt)*d.age46to60))
-        age60plus_cnt.push(Math.round(parseInt(d.enter_cnt+d.exit_cnt)*(1-d.age17to30-d.ageless16-d.age31to45-d.age46to60)))
-        bodyfat_cnt.push(Math.round(parseInt(d.enter_cnt+d.exit_cnt)*d.bodyfat))
-        bodynormal_cnt.push(Math.round(parseInt(d.enter_cnt+d.exit_cnt)*d.bodynormal))
-        bodythin_cnt.push(Math.round(parseInt(d.enter_cnt+d.exit_cnt)*d.bodythin))
-        baldhead_cnt.push(Math.round(parseInt(d.enter_cnt+d.exit_cnt)*d.hs_baldhead))
-        longhair_cnt.push(Math.round(parseInt(d.enter_cnt+d.exit_cnt)*d.hs_longhair))
-        otherhair_cnt.push(Math.round(parseInt(d.enter_cnt+d.exit_cnt)*(1-d.hs_baldhead-d.hs_longhair)))
-        blackhair_cnt.push(Math.round(parseInt(d.enter_cnt+d.exit_cnt)*d.hs_blackhair))
-        othercolorhair_cnt.push(Math.round(parseInt(d.enter_cnt+d.exit_cnt)*(1-d.hs_blackhair)))
-        withglasses_cnt.push(Math.round(parseInt(d.enter_cnt+d.exit_cnt)*d.hs_glasses))
-        noglasses_cnt.push(Math.round(parseInt(d.enter_cnt+d.exit_cnt)*(1-d.hs_glasses)))
-        hashat_cnt.push(Math.round(parseInt(d.enter_cnt+d.exit_cnt)*d.hs_hat))
-        nohat_cnt.push(Math.round(parseInt(d.enter_cnt+d.exit_cnt)*(1-d.hs_hat)))
-    });
+    for (const[key, value] of Object.entries(data)){
+        if (value){
+            enter_temp=[]
+            exit_temp=[]
+            watcher_temp=[]
+            value.forEach(d=>{
+                enter_temp.push(parseInt(d.enter_cnt))
+                exit_temp.push(parseInt(d.exit_cnt))
+                watcher_temp.push(parseInt(d.watcher_cnt))
+                
+            })
+            var enter_sum=enter_temp.reduce(function(a,b){return a+b},0)
+            var exit_sum=exit_temp.reduce(function(a,b){return a+b},0)
+            var watcher_sum=watcher_temp.reduce(function(a,b){return a+b},0)
+            var total=enter_sum+exit_sum+watcher_sum
+            enter_cnt.push(Math.round(enter_sum*100/total))
+            exit_cnt.push(Math.round(exit_sum/total))
+            watcher_cnt.push(Math.round(watcher_sum/total))
+            all_stores.push(store_names[key])
+        }
+        else{
+            enter_cnt.push(0)
+            exit_cnt.push(0)
+            watcher_cnt.push(0)
+            all_stores.push('placeholder')
+        }
+    };
+    enter_cnt.sort((a,b)=>b-a)
+    all_stores.sort((a,b)=>enter_cnt[all_stores.indexOf(a)] - enter_cnt[all_stores.indexOf(b)])
+    console.log(enter_cnt.slice(0,10))
+    // console.log(enter_cnt)
+    console.log(all_stores.slice(0,10))
 
-    // var enter_tot=enter_cnt.reduce(function(a,b){return a+b},0);
-    // var exit_tot=exit_cnt.reduce(function(a,b){return a+b},0);
-    var female_tot=female_cnt.reduce(function(a,b){return a+b},0);
-    var male_tot=male_cnt.reduce(function(a,b){return a+b},0);
-    var age16minus_tot=age16minus_cnt.reduce(function(a,b){return a+b},0);
-    var age17to30_tot=age17to30_cnt.reduce(function(a,b){return a+b},0);
-    var age31to45_tot=age31to45_cnt.reduce(function(a,b){return a+b},0);
-    var age46to60_tot=age46to60_cnt.reduce(function(a,b){return a+b},0);
-    var age60plus_tot=age60plus_cnt.reduce(function(a,b){return a+b},0);
-    var bodyfat_tot=bodyfat_cnt.reduce(function(a,b){return a+b},0);
-    var bodynormal_tot=bodynormal_cnt.reduce(function(a,b){return a+b},0);
-    var bodythin_tot=bodythin_cnt.reduce(function(a,b){return a+b},0);
-    var baldhead_tot=baldhead_cnt.reduce(function(a,b){return a+b},0);
-    var longhair_tot=longhair_cnt.reduce(function(a,b){return a+b},0);
-    var otherhair_tot=otherhair_cnt.reduce(function(a,b){return a+b},0);
-    var blackhair_tot=blackhair_cnt.reduce(function(a,b){return a+b},0);
-    var othercolorhair_tot=othercolorhair_cnt.reduce(function(a,b){return a+b},0);
-    var withglasses_tot=withglasses_cnt.reduce(function(a,b){return a+b},0);
-    var noglasses_tot=noglasses_cnt.reduce(function(a,b){return a+b},0);
-    var hashat_tot=hashat_cnt.reduce(function(a,b){return a+b},0);
-    var nohat_tot=nohat_cnt.reduce(function(a,b){return a+b},0);
-
-    return [[female_tot,male_tot],
-            [age16minus_tot,age17to30_tot,age31to45_tot,age46to60_tot,age60plus_tot],
-            [bodyfat_tot,bodynormal_tot,bodythin_tot],
-            [baldhead_tot,longhair_tot,otherhair_tot],
-            [blackhair_tot,othercolorhair_tot],
-            [withglasses_tot,noglasses_tot],
-            [hashat_tot,nohat_tot]]
-}
-
-
-function createPiechart(data){
-    var options={
-        val1: '性别',
-        val2: '年龄',
-        val3: '身材',
-        val4: '发型',
-        val5: '发色',
-        val6: '眼镜',
-        val7: '帽子'
-    }
-    $('#dropdown').empty()
-    var mySelect = $('#dropdown').append("<select id='mySelect'>");
-    $.each(options, function(val, text) {
-        $('#mySelect').append(
-            $('<option></option>').val(val).html(text)
-        );
-    });
-
-    labels=[
-        ['女性','男性'],
-        ['16岁以下','17-30岁','31-45岁','46-60岁','60岁以上'],
-        ['偏胖','正常','偏瘦'],
-        ['光头','长发','其他发型'],
-        ['黑发','其他发色'],
-        ['戴眼镜','不戴眼镜'],
-        ['戴帽子','不戴帽子']
-    ]
-
-
-    mySelect.on('change',function(){
-        // $('#pie-chart').empty();
-        var my_select=document.getElementById('mySelect')
-        var selected_id= my_select.selectedIndex
-        var displayData=dataWrangle(data)[selected_id]
-        var displayLabel=labels[selected_id]
-        var displayColor=color_platter.slice(0,displayLabel.length)
-        console.log(displayData,displayLabel,displayColor)
-        DonutChartBasic(displayData,displayLabel,displayColor)
-    })
-    
-    DonutChartBasic(dataWrangle(data)[0],labels[0],color_platter.slice(0,labels[0].length));
-
-
-    
-}
-function DonutChartBasic(data,labels,colors){
-    $('#pie-chart').empty();
-    var total=data.reduce(function(a,b){return a+b},0)
     var options = {
-        series: data,
+        series: [{
+        data: enter_cnt.slice(0,10)
+      }],
         chart: {
-        type: 'donut',
-        height: '90%',
-        offsetY: 50  
+        type: 'bar',
+        height: 350
+      },
+      plotOptions: {
+        bar: {
+          horizontal: true,
+        },
+      },
+      colors:['#FF0091'],
+      grid:{
+          show: false
       },
       dataLabels: {
         enabled: false
       },
-      tooltip: {
-        y: {
-        formatter: function(val) {
-            return (val*100/total).toFixed(1)+"%"
-        }
-        }
-    },
-      colors: colors,
-      labels:labels,
-      legend: {
-        position: 'bottom',
-        fontSize:'10px',
-        labels: {
-            colors: 'white',
-            useSeriesColors: false
+      yaxis: {
+        axisBorder: {
+            show:false
+        },
+        labels:{
+            style: {
+                colors: "white"
+            },
+        },
+        axisTicks:{
+            show:false
+        },
+        lines:{
+            show: false
         },
       },
-      title: {
-        text: '顾客特征比率',
-        align: 'left',
-        margin: 10,
-        offsetX: 0,
-        offsetY: 0,
-        floating: true,
-        style: {
-          fontSize:  '14px',
-          fontWeight:  'bold',
-          fontFamily:  undefined,
-          color:  'white'
+      xaxis: {
+        min:0,
+        max:50,
+        lines:{
+            show: false
         },
+        labels:{
+            style: {
+                colors: "white"
+            },
+        },
+        axisTicks:{
+            show:false
+        },
+        categories: all_stores.slice(0,10),
+      },
+      tooltip: {
+        y: {
+            title:{
+                formatter: function(){
+                    return null
+                }
+                }
+            }
+        
         }
-    };
-
-      var chart = new ApexCharts(document.querySelector("#pie-chart"), options);
-      chart.render();
+      };
+      var chart = new ApexCharts(document.querySelector("#bar-chart"), options);
+      chart.render();    
 }
+
+
+
 
 
 
