@@ -84,13 +84,34 @@ floorGroup0.on("loaded", function(){
         text: '节点信息'
     }));
 
+    var button4=$('#home').append($('<button>',{
+        id: 'btn-floor-back',
+        class: 'btn btn-primary',
+        type: 'button',
+        text: '返回首页'
+    }));
+
+    var button5=$('#home').append($('<button>',{
+        id: 'btn-store-back',
+        class: 'btn btn-primary',
+        type: 'button',
+        text: '返回首页'
+    }));
+
     document.getElementById("btn-floor").onclick = function () {
-        location.href = "demo.html#2";
+        location.href = "demo.html#1";
     };
     document.getElementById("btn-store").onclick = function () {
-        location.href = "demo.html#3";
+        location.href = "demo.html#2";
     };
     document.getElementById("btn-node").onclick = function () {
-        location.href = "demo.html#4";
+        location.href = "demo.html#3";
+    };
+
+    document.getElementById("btn-floor-back").onclick = function () {
+        location.href = "demo.html#0";
+    };
+    document.getElementById("btn-store-back").onclick = function () {
+        location.href = "demo.html#0";
     };
 });
