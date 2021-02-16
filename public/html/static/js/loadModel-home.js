@@ -59,9 +59,9 @@ floorGroup0.on("loaded", function(){
     var cameraFlight0 = new xeogl.CameraFlightAnimation();
     cameraFlight0.flyTo(floorGroup0);
 
-    // scene0.on('tick',function(){
-    //     scene0.camera.orbitYaw(0.2)
-    // })
+    scene0.on('tick',function(){
+        scene0.camera.orbitYaw(0.2)
+    })
 
     var button1=$('#home').append($('<button>',{
         id: 'btn-floor',
