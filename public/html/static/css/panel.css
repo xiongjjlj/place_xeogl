@@ -37,7 +37,7 @@
 }
 
 #right-panel-container1{
-	right:0;
+	right:100px;
 	bottom: 50;
 	position: absolute;
 	padding: 20px 40px 20px 40px;

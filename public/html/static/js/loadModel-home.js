@@ -99,19 +99,19 @@ floorGroup0.on("loaded", function(){
     }));
 
     document.getElementById("btn-floor").onclick = function () {
-        location.href = "demo.html#1";
+        location.href = "index.html#1";
     };
     document.getElementById("btn-store").onclick = function () {
-        location.href = "demo.html#2";
+        location.href = "index.html#2";
     };
     document.getElementById("btn-node").onclick = function () {
-        location.href = "demo.html#3";
+        location.href = "index.html#3";
     };
 
     document.getElementById("btn-floor-back").onclick = function () {
-        location.href = "demo.html#0";
+        location.href = "index.html#0";
     };
     document.getElementById("btn-store-back").onclick = function () {
-        location.href = "demo.html#0";
+        location.href = "index.html#0";
     };
 });
