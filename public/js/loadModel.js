@@ -1,10 +1,26 @@
+cameras = ['J01', 'J02', 'J03', 'J04', 'J05', 'J06', 'J07', 'J08', 'J09', 
+'J11', 'J12', 'J13', 'J14', 'J15', 'J16', 'J17', 'J18', 'J19', 
+'J20', 'J21', 'J22', 'J23', 'J24', 'J25', 'J26', 'J27', 'J28', 
+'J29', 'J30', 'J31', 'J32', 'J33', 'J34', 'J35']
 
-// glabal variables
-const id2floor={
-    '_801': 'L7',
-    '_800': 'L6',
-    '_799': 'L5',
-    '_798': 'L4',
+stores =  ['2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009', '2011', 
+'2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', 
+'2020', '2021', '2022', '2023', '2024', '2025', '2026', '2027', 
+'2028', '2029', '2030', '2031', '2032', '2033', '2034', '2035', 
+'2036', '2037', '2038']
+
+stores = []
+
+floorOrder = {
+    'B3': -2,
+    'B2': -1,
+    'B1': 0,
+    'L1': 1,
+    'L2': 2,
+    'L3': 3,
+    'L4': 4,
+    'L5': 5,
+    'L6': 6,
     '_797': 'L3',
     '_796': 'L2',
     '_795': 'L1',
@@ -19,7 +35,7 @@ var storeAnno = [];
 
 //create scenen object
 var scene = new xeogl.Scene({
-    // canvas:'mycanvas',
+    // canvas:'myCanvas',
     transparent: false,
     backgroundColor: [0.125, 0.125, 0.125]
 });
@@ -39,7 +55,7 @@ var lastStore_id;
 const scale=0.001
 
 camera.eye = [100, 100, -100];
-camera.look = [150, 5, -170];
+camera.look = [150, 7, -170];
 camera.up = [0,1,0];
 camera.projection = "ortho";
 
@@ -54,13 +70,17 @@ scene.highlightMaterial.edgeAlpha = 0.6;
 scene.highlightMaterial.edgeColor = [0, 0, 0];
 scene.highlightMaterial.edgeWidth = 2;
 
+var lastEntity = null;
+var lastColorize = null;
+var input = scene.input;
+
 //---------------------------------------------------
 // Load the model
 //---------------------------------------------------
 
 var floorGroup = new xeogl.GLTFModel({
     id: "floors",
-    src: "./static/models/floor5.gltf",
+    src: "/static/models/floor5.gltf",
     scale: [scale, scale, scale],
     edgeThreshold: 20,
     opacity: 0.9,
@@ -82,7 +102,7 @@ var floorGroup = new xeogl.GLTFModel({
 
 var env = new xeogl.GLTFModel({
     id: "hopson-env",
-    src: "./static/models/env.gltf",
+    src: "/static/models/env.gltf",
     scale: [scale, scale, scale],
     // edgeThreshold: 50,
     edges: false,
@@ -103,7 +123,7 @@ var env = new xeogl.GLTFModel({
 
 var storeGroup = new xeogl.GLTFModel({
     id: "storeGroup",
-    src: "./static/models/stores.gltf",
+    src: "/static/models/stores.gltf",
     scale: [scale, scale, scale],
     edgeThreshold: 0,
     opacity: 0.2,
@@ -126,7 +146,7 @@ var storeGroup = new xeogl.GLTFModel({
 
 var cameraGroup = new xeogl.GLTFModel({
     id: "cameraGroup",
-    src: "./static/models/camera.gltf",
+    src: "/static/models/camera.gltf",
     scale: [scale, scale, scale],
     edgeThreshold: 20,
     opacity: 0.4,
@@ -152,18 +172,17 @@ storeGroup.on("loaded", function(){
 
 });
 
+// initial_centers={};
 floorGroup.on("loaded", function(){
-    var cameraFlight = new xeogl.CameraFlightAnimation();
-    cameraFlight.flyTo(floorGroup);
+
     for (const [key, value] of Object.entries(floorGroup.objects)) {
         floors.push(key)
     }
+
     console.log('model loaded')
     cameraControl.on('picked', function(hit){
-        // console.log('hit mesh: ',hit.mesh.id)
+        console.log('hit mesh: ',hit.mesh.id)
     if (floors.includes(hit.mesh.id)){
-        $('#bar-chart').empty();
-
         picked_center = hit.mesh._aabbCenter[1];
             for (const [key, value] of Object.entries(floorGroup.meshes)) {
                 if (value._aabbCenter[1] > picked_center)
@@ -184,16 +203,13 @@ floorGroup.on("loaded", function(){
     
                 if (store_id.slice(0,2)==id2floor[hit.mesh.id]){
                     storeGroup.objects[store_id].visible = true;
-                    if(Object.keys(store_names).includes(store_id)){
-                        storeGroup.objects[store_id].opacity=0.5
-                    }
                     deltaY=storeGroup.objects[store_id].position[1];
                     storeGroup.objects[store_id].position = [0,deltaY+10,0];
                     var store = new xeogl.Annotation(scene, {
                         mesh: storeGroup.objects[store_id], 
                         id: "Anno"+ store_id,
                         bary: [0.33, 0.33, 0.33],
-                        occludable: false,
+                        occludable: true,
                         glyph: store_id,
                         desc: 'Store ID: ' + store_id,
                         pinShown: false,
@@ -212,6 +228,7 @@ floorGroup.on("loaded", function(){
     cameraControl.on("hoverEnter", function (hit) {     
     // ------ for store
     if (stores.includes(hit.mesh.id)) {
+        mesh=scene.components[hit.mesh.id];
         object = scene.components['Anno'+ hit.mesh.id];
         object.mesh.aabbVisible = true;
         object.labelShown = true;
@@ -224,18 +241,16 @@ floorGroup.on("loaded", function(){
     if (stores.includes(hit.mesh.id)) {
         object = scene.components['Anno'+ hit.mesh.id];
         object.mesh.aabbVisible = false;
+        object.colorize = [1.0, 0, 0];
         object.labelShown = false;
         // do other things for store
         }
     });
 
-    cameraControl.on("picked", function (hit) {
+    cameraControl.on("picked", function (hit) {     
         if(stores.includes(hit.mesh.id)){
             if (currentFloorStores.includes(hit.mesh.id)) {
-                if (lastStore_id && Object.keys(store_names).includes(lastStore_id)){
-                    storeGroup.meshes[lastStore_id].opacity=0.5
-                }
-                else if(lastStore_id){
+                if (lastStore_id){
                     storeGroup.meshes[lastStore_id].opacity=0.2
                 }
                 selected_store=hit.mesh.id
@@ -246,11 +261,8 @@ floorGroup.on("loaded", function(){
     });
     
     cameraControl.on("pickedNothing", function (hit) {
-        if (lastStore_id && Object.keys(booth2store).includes(lastStore_id)){
-            storeGroup.meshes[lastStore_id].opacity=0.5
-        }
-        else if(lastStore_id){
-            storeGroup.meshes[lastStore_id].opacity=0.2
-        }
+        // if (lastStore_id){
+        //     storeGroup.meshes[lastStore_id].opacity=0.2
+        // }
     });
 });
