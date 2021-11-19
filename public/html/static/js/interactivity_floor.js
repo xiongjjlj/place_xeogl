@@ -109,7 +109,7 @@ floorGroup2.on('loaded',function(){
         $('#right-panel-container1').append($('<div>',{
             class: "container-fluid",
             id: "panel-body1",
-            color: 'white'
+            color: 'black'
         }))
 
         // event2: change placeholder text and exlopde the model
@@ -147,7 +147,7 @@ floorGroup2.on('loaded',function(){
 function contract(){
         // console.log('contracted!')
         for (const [key, value] of Object.entries(floorGroup2.meshes)) {
-         value.position=[0,0,0]
+           value.position=[0,0,0]
         //    console.log(value.position)
     }
 }
@@ -159,29 +159,22 @@ function showStoreRank(floor){
 }
 
 cameraControl.on("picked", function (hit) { 
-        // console.log('picked!') 
-        // console.log(hit.mesh.id)
-        if(keys.includes(hit.mesh.id)){
-            // console.log("selected floor: ", selected_floor)
-            if (startDateTime && endDateTime && selected_floor){
-                loadRangeData(startDateTime,endDateTime,id2fl[selected_floor]);
-            }
+    if(keys.includes(hit.mesh.id)){
+        if (startDateTime && endDateTime && selected_floor){
+            loadRangeData(startDateTime,endDateTime,id2fl[selected_floor]);
         }
-    })
+    }
+})
 });
 
 function loadRangeData(startDateTime,endDateTime,floor_id){
-
-    // console.log("search btwn: ",startDateTime,endDateTime)
-    // console.log("search floor: ",floor_id)
-
     $.post(apisUrl + '/get_floor_kpis', {'start_time': startDateTime, 'end_time': endDateTime, 'floor_id': "'"+floor_id+"'", 'property_id': property_id}, function(data, textStatus){
         if (textStatus=='success'){
 
             $('#chart-title').append("<ul id='title'>")
             $('#chart-title').append("<ul id='text-time-range'>")
-            $('#title').html('楼层总览，'+floor_id);
-            $('#text-time-range').html('时间段：'+  startDateTime+' - '+endDateTime);
+            $('#title').html('<b>楼层总览</b>: '+floor_id);
+            $('#text-time-range').html('<b>时间段</b>: '+  startDateTime+' - '+endDateTime);
 
             createStackedBar(dataWrangle(data)[0],['男性','女性'],'性别比例','bar-chart-gender')
             createStackedBar(dataWrangle(data)[1],['16岁以下','17-30岁','31-45岁','46-60岁','60岁以上'],'年龄比例','bar-chart-age')
@@ -312,14 +305,14 @@ function createStackedBar(data,categories,title,parentElement){
             categories: [title],
             labels:{
                 style:{
-                    colors: 'white'
+                    colors: 'black'
                 }
             }
         },
         yaxis: {
             labels:{
                 style:{
-                    colors: 'white'
+                    colors: 'black'
                 }
             }
         },
@@ -344,7 +337,7 @@ function createStackedBar(data,categories,title,parentElement){
             offsetX: 40,
             offsetY: 23,
             labels: {
-                colors:'white',
+                colors:'black',
 
             },
             markers: {
@@ -385,7 +378,7 @@ function DonutChartBasic(data,labels,colors){
             position: 'right',
             fontSize:'8px',
             labels: {
-                colors: 'white',
+                colors: 'black',
                 useSeriesColors: false
             },
             markers:{
@@ -403,7 +396,7 @@ function DonutChartBasic(data,labels,colors){
               fontSize:  '14px',
               fontWeight:  'regular',
               fontFamily:  undefined,
-              color:  'white'
+              color:  'black'
           },
       }
   };
@@ -414,34 +407,30 @@ function DonutChartBasic(data,labels,colors){
 
 function createRank(data){
     $('#panel-body1').empty();
-    // console.log('data in',data)
     var enter_cnt=new Array();
     var exit_cnt=new Array();
     var watcher_cnt=new Array();
     var all_stores=new Array();
-    // var passer_cnt=new Array();
-    console.log('data in',data)
-    // for (let i=0;i<data.length;i++) {
-        for (var [key,value] of Object.entries(data)){
-            enter_temp=[]
-            exit_temp=[]
-            watcher_temp=[]
-            value.forEach(d=>{
-                enter_temp.push(parseInt(d.enter_cnt))
-                exit_temp.push(parseInt(d.exit_cnt))
-                watcher_temp.push(parseInt(d.watcher_cnt))
-            })
-            var enter_sum=enter_temp.reduce(function(a,b){return a+b},0)
-            var exit_sum=exit_temp.reduce(function(a,b){return a+b},0)
-            var watcher_sum=watcher_temp.reduce(function(a,b){return a+b},0)
-            var total=enter_sum+exit_sum+watcher_sum
-            enter_cnt.push(Math.round(enter_sum*100/total))
-            exit_cnt.push(Math.round(exit_sum/total))
-            watcher_cnt.push(Math.round(watcher_sum/total))
-            all_stores.push(key)
-        };
-        enter_cnt.sort((a,b)=>b-a)
-        all_stores.sort((a,b)=>enter_cnt[all_stores.indexOf(a)] - enter_cnt[all_stores.indexOf(b)])
+    for (var [key,value] of Object.entries(data)){
+        enter_temp=[]
+        exit_temp=[]
+        watcher_temp=[]
+        value.forEach(d=>{
+            enter_temp.push(parseInt(d.enter_cnt))
+            exit_temp.push(parseInt(d.exit_cnt))
+            watcher_temp.push(parseInt(d.watcher_cnt))
+        })
+        var enter_sum=enter_temp.reduce(function(a,b){return a+b},0)
+        var exit_sum=exit_temp.reduce(function(a,b){return a+b},0)
+        var watcher_sum=watcher_temp.reduce(function(a,b){return a+b},0)
+        var total=enter_sum+exit_sum+watcher_sum
+        enter_cnt.push(Math.round(enter_sum*100/total))
+        exit_cnt.push(Math.round(exit_sum/total))
+        watcher_cnt.push(Math.round(watcher_sum/total))
+        all_stores.push(key)
+    };
+    enter_cnt.sort((a,b)=>b-a)
+    all_stores.sort((a,b)=>enter_cnt[all_stores.indexOf(a)] - enter_cnt[all_stores.indexOf(b)])
     var options = {
         series: [{
             data: enter_cnt
@@ -462,7 +451,7 @@ function createRank(data){
       title: {
         text: id2fl[selected_floor]+'店铺进客率排名',
         style:{
-            color: 'white',
+            color: 'black',
             fontSize: '12pt'
         }
     },
@@ -475,7 +464,7 @@ function createRank(data){
         },
         labels:{
             style: {
-                colors: "white"
+                colors: "black"
             },
         },
         axisTicks:{

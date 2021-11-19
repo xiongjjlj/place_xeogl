@@ -10,7 +10,7 @@ var display_data={}
 //create scenen object
 var scene = new xeogl.Scene({
     transparent: false,
-    backgroundColor: [0.125, 0.125, 0.125]
+    backgroundColor: [1, 1, 1]
 });
 
 xeogl.setDefaultScene(scene);
@@ -20,12 +20,15 @@ xeogl.setDefaultScene(scene);
 //----------------------------------------------------------------------------------------------------
 
 var camera = scene.camera;
-const scale=0.001
+const scale=0.0002
 
-camera.eye = [100, 110, -100];
-camera.look = [150, 5, -170];
+camera.eye = [9.073974609375, 23.832809448242188, -38.2408447265625];
+camera.look = [102.11075592041016, -208.75921630859375, -168.49229431152344];
 camera.up = [0,1,0];
+// camera.zoom = -20;
 camera.projection = "ortho";
+
+setInterval(function(){ console.log(camera.eye, camera.look, camera.up, camera.zoom); }, 3000);
 
 var cameraControl = new xeogl.CameraControl();
 
@@ -33,11 +36,13 @@ scene.highlightMaterial.fillAlpha = 1;
 scene.highlightMaterial.edgeAlpha = 0.6;
 scene.highlightMaterial.edgeColor = [0, 0, 0];
 scene.highlightMaterial.edgeWidth = 2;
-
 //---------------------------------------------------
 // Load the model
 //---------------------------------------------------
-
+new xeogl.AmbientLight({
+        color: [1, 1, 1.0],
+        intensity: 1
+    });
 var floorGroup2 = new xeogl.GLTFModel({
     id: "floors",
     src: "./static/models/floor5.gltf",
@@ -54,7 +59,8 @@ var floorGroup2 = new xeogl.GLTFModel({
             }
             return true;
         };
-    })
+    }),
+    backgroundColor: [1, 1, 1]
 })
 
 var env = new xeogl.GLTFModel({
@@ -74,13 +80,13 @@ var env = new xeogl.GLTFModel({
         return function (nodeInfo, actions) {
             return true;
         };
-    })
+    }),
+    backgroundColor: [1, 1, 1]
 });
 
 floorGroup2.on("loaded", function(){
     var cameraFlight = new xeogl.CameraFlightAnimation();
-    cameraFlight.flyTo(env);
-
+    // cameraFlight.flyTo(env);
     console.log(id2fl)
 
     for (const [key, value] of Object.entries(floorGroup2.objects)) {
