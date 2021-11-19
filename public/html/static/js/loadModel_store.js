@@ -21,7 +21,7 @@ var storeAnno = [];
 var scene = new xeogl.Scene({
     // canvas:'mycanvas',
     transparent: false,
-    backgroundColor: [0.125, 0.125, 0.125]
+    backgroundColor: [1, 1, 1]
 });
 
 xeogl.setDefaultScene(scene);
@@ -38,13 +38,18 @@ var selected_store;
 var lastStore_id;
 const scale=0.001
 
-camera.eye = [100, 100, -100];
-camera.look = [150, 5, -170];
-camera.up = [0,1,0];
+camera.eye = [-41.79920959472656, 471.7275085449219, 81.58251953125];
+camera.look = [154.44793701171875, 29.48394203186035, -208.25796508789062];
+camera.up = [0.0371570847928524, 0.9978016018867493, -0.0548778772354126];
 camera.projection = "ortho";
+var ortho = camera.ortho;
 
 var cameraControl = new xeogl.CameraControl({
     doublePickFlyTo: false
+});
+new xeogl.AmbientLight({
+    color: [1, 1, 1.0],
+    intensity: 1
 });
 
 var cameraFlight = new xeogl.CameraFlightAnimation();
@@ -53,6 +58,8 @@ scene.highlightMaterial.fillAlpha = 1;
 scene.highlightMaterial.edgeAlpha = 0.6;
 scene.highlightMaterial.edgeColor = [0, 0, 0];
 scene.highlightMaterial.edgeWidth = 2;
+
+// setInterval(function(){ console.log(camera.eye, camera.look, camera.up, camera.zoom); }, 3000);
 
 //---------------------------------------------------
 // Load the model

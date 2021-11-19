@@ -20,15 +20,18 @@ xeogl.setDefaultScene(scene);
 //----------------------------------------------------------------------------------------------------
 
 var camera = scene.camera;
+var ortho = camera.ortho;
 const scale=0.0002
 
 camera.eye = [9.073974609375, 23.832809448242188, -38.2408447265625];
 camera.look = [102.11075592041016, -208.75921630859375, -168.49229431152344];
 camera.up = [0,1,0];
+ortho.scale = 120;
+
 // camera.zoom = -20;
 camera.projection = "ortho";
 
-setInterval(function(){ console.log(camera.eye, camera.look, camera.up, camera.zoom); }, 3000);
+// setInterval(function(){ console.log(camera.eye, camera.look, camera.up, camera.zoom); }, 3000);
 
 var cameraControl = new xeogl.CameraControl();
 
@@ -40,9 +43,9 @@ scene.highlightMaterial.edgeWidth = 2;
 // Load the model
 //---------------------------------------------------
 new xeogl.AmbientLight({
-        color: [1, 1, 1.0],
-        intensity: 1
-    });
+    color: [1, 1, 1.0],
+    intensity: 1
+});
 var floorGroup2 = new xeogl.GLTFModel({
     id: "floors",
     src: "./static/models/floor5.gltf",
@@ -87,7 +90,6 @@ var env = new xeogl.GLTFModel({
 floorGroup2.on("loaded", function(){
     var cameraFlight = new xeogl.CameraFlightAnimation();
     // cameraFlight.flyTo(env);
-    console.log(id2fl)
 
     for (const [key, value] of Object.entries(floorGroup2.objects)) {
         floors.push(key)
