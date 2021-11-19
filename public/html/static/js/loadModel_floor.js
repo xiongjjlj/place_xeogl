@@ -1,5 +1,5 @@
 // glabal variables
-const apisUrl='http://161.189.24.17:3005'
+const apisUrl='https://api.placeint.net:3005'
 var stores = [];
 var floors= [];
 var selected_floor;
@@ -43,7 +43,7 @@ var floorGroup2 = new xeogl.GLTFModel({
     src: "./static/models/floor5.gltf",
     scale: [scale, scale, scale],
     edgeThreshold: 20,
-    opacity: 1.0,
+    opacity: 0.5,
     visible: true,
     handleNode: (function(nodeInfo, actions) {
         return function (nodeInfo, actions) {
@@ -81,14 +81,33 @@ floorGroup2.on("loaded", function(){
     var cameraFlight = new xeogl.CameraFlightAnimation();
     cameraFlight.flyTo(env);
 
+    console.log(id2fl)
+
     for (const [key, value] of Object.entries(floorGroup2.objects)) {
         floors.push(key)
     }
+
+    // 初始状态的显示L1
+    // $.post(apisUrl + '/get_store_id_of_one_floor_id', {'floor_id': id2fl[selected_floor], 'property_id': property_id}, function(data, textStatus, jqXHR){
+    //     if (textStatus=='success'){
+    //         data.forEach(function(d){
+    //             stores_on_floor.push(d.store_name)
+    //             $.post(apisUrl + '/get_store_kpis2', {'start_time': startDateTime, 'end_time': endDateTime, 'store_id': d.store_name, 'property_id': property_id}, function(data, textStatus){
+    //                 if(textStatus=='success'){
+    //                     display_data[d.store_name]=data
+    //                 }
+    //             })
+    //         })
+    //         console.log(display_data)
+    //     }
+    // });
+
     cameraControl.on("picked", function (hit) {     
         // ------ for store
         if (floors.includes(hit.mesh.id)) {
             $('#panel-body1').empty()
-            console.log(lastfloor_id)
+
+            // 选中楼层的上色
             if (lastfloor_id){
                 floorGroup2.meshes[lastfloor_id].colorize=[1,1,1]
                 floorGroup2.meshes[lastfloor_id].opacity=1
@@ -101,23 +120,20 @@ floorGroup2.on("loaded", function(){
             // prepare the data for ranking bar chart
             stores_on_floor=[]
             display_data={}
-            $.post(apisUrl + '/get_store_id_of_one_floor_id', {'floor_id': id2fl[selected_floor]}, function(data, textStatus, jqXHR){
+            $.post(apisUrl + '/get_store_id_of_one_floor_id', {'floor_id': id2fl[selected_floor], 'property_id': property_id}, function(data, textStatus, jqXHR){
                 if (textStatus=='success'){
                     data.forEach(function(d){
                         stores_on_floor.push(d.store_name)
-                        $.post(apisUrl + '/get_store_kpis2', {'start_time': startDateTime, 'end_time': endDateTime, 'store_id': d.store_name}, function(data, textStatus){
+                        $.post(apisUrl + '/get_store_kpis2', {'start_time': startDateTime, 'end_time': endDateTime, 'store_id': d.store_name, 'property_id': property_id}, function(data, textStatus){
                             if(textStatus=='success'){
                                 display_data[d.store_name]=data
-                                // display_data.push(data)
                             }
                         })
                     })
-                    console.log(display_data)
                 }
             });
-            }
-        });
-    
+        }
+    });
     cameraControl.on("pickedNothing", function (hit) {
         // ------ for store
         if (lastfloor_id){
@@ -126,5 +142,5 @@ floorGroup2.on("loaded", function(){
         }
         selected_floor=''
         $('#panel-body1').empty()
-        });
+    });
 });

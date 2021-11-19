@@ -1,5 +1,6 @@
 
-const apisUrl='http://161.189.24.17:3005'
+const apisUrl='https://api.placeint.net:3005'
+const property_id='beijing_hopson_one'
 var store_id_sel;
 var stores_sel;
 var startDateTime='';
@@ -30,7 +31,7 @@ $('#datetime-body').append($('<input>',{
 
 
 
-$.post(apisUrl + '/get_available_date', function(data, textStatus, jqXHR){
+$.post(apisUrl + '/get_available_date', {'property_id': property_id}, function(data, textStatus, jqXHR){
     $('#datetime-body').daterangepicker({minDate:moment(data[0].start_date),
                                          maxDate:moment(data[0].end_date),
                                          timePicker: true, 
@@ -38,7 +39,7 @@ $.post(apisUrl + '/get_available_date', function(data, textStatus, jqXHR){
                                          alwaysShowCalendars: false})
 });
 
-$.post(apisUrl + '/get_store_info', function(data, textStatus, jqXHR){
+$.post(apisUrl + '/get_store_info', {'property_id': property_id}, function(data, textStatus, jqXHR){
     console.log(textStatus);
     for (let i=0;i<data.length;i++){
         store_names[data[i].store_berth]=data[i].store_name
@@ -65,8 +66,6 @@ floorGroup.on('loaded',function(){
             }
             if (store_id_sel){
                 loadRangeData(startDateTime,endDateTime,store_names[store_id_sel]);
-
-                
             }
         }
     console.log('all stores on floor ', currentFloorStores)
@@ -80,7 +79,7 @@ function loadRangeData(startDateTime,endDateTime,store_id){
     console.log("search btwn: ",startDateTime,endDateTime)
     
 
-    $.post(apisUrl + '/get_store_kpis2', {'start_time': startDateTime, 'end_time': endDateTime, 'store_id': store_id}, function(data, textStatus, jqXHR){
+    $.post(apisUrl + '/get_store_kpis2', {'start_time': startDateTime, 'end_time': endDateTime, 'store_id': store_id, 'property_id': property_id}, function(data, textStatus, jqXHR){
         if (textStatus=='success'){
             // console.log('data requested!');
 
@@ -477,7 +476,7 @@ function DonutChartBasic(data,labels,colors){
         series: data,
         chart: {
         type: 'donut',
-        height: '90%',
+        height: '80%',
         offsetY: 50  
       },
       dataLabels: {
@@ -493,7 +492,7 @@ function DonutChartBasic(data,labels,colors){
       colors: colors,
       labels:labels,
       legend: {
-        position: 'bottom',
+        position: 'right',
         fontSize:'10px',
         labels: {
             colors: 'white',
@@ -502,7 +501,7 @@ function DonutChartBasic(data,labels,colors){
       },
       title: {
         text: '顾客特征比率',
-        align: 'left',
+        align: 'top',
         margin: 10,
         offsetX: 0,
         offsetY: 0,

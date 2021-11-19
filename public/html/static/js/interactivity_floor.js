@@ -1,5 +1,6 @@
 
 // const apisUrl='http://161.189.24.17:3005'
+const property_id='beijing_hopson_one'
 
 var startDateTime='';
 var endDateTime='';
@@ -45,25 +46,34 @@ var button1=$('#button-explode').append($('<button>',{
     id: 'btn-explode',
     class: 'btn',
     type: 'button',
-    text: '展开'
+    text: '展开楼层'
 }));
 
 
-$.post(apisUrl + '/get_available_date', function(data, textStatus, jqXHR){
+$.post(apisUrl + '/get_available_date', {'property_id': property_id}, function(data, textStatus, jqXHR){
     $('#datetime-body').daterangepicker({minDate:moment(data[0].start_date),
-                                         maxDate:moment(data[0].end_date),
-                                         timePicker: true, 
-                                         timePicker24Hour: true,
-                                         alwaysShowCalendars: false})
+        maxDate:moment(data[0].end_date),
+        startDate:moment(data[0].end_date).subtract(7, "days"),
+        endDate:moment(data[0].end_date),
+        timePicker: true, 
+        timePicker24Hour: true,
+        alwaysShowCalendars: false})
+    
+    // get initial data!!!!!
+    startDateTime = $('#datetime-body').data('daterangepicker').startDate.format('YYYY-MM-DD HH:mm:ss');
+    endDateTime = $('#datetime-body').data('daterangepicker').endDate.format('YYYY-MM-DD HH:mm:ss');
+    $('#input').attr('placeholder', startDateTime+' - '+endDateTime);
+    loadRangeData(startDateTime,endDateTime,'L1');
+
 });
 
-$.post(apisUrl + '/get_store_info', function(data, textStatus, jqXHR){
+$.post(apisUrl + '/get_store_info', {'property_id': property_id}, function(data, textStatus, jqXHR){
     for (let i=0;i<data.length;i++){
         store2booth[data[i].store_name]=data[i].store_berth
     }
     // console.log('store info', store2booth);
 });
- 
+
 $('#datetime-body').on('apply.daterangepicker',function(){
     startDateTime = $('#datetime-body').data('daterangepicker').startDate.format('YYYY-MM-DD HH:mm:ss');
     endDateTime = $('#datetime-body').data('daterangepicker').endDate.format('YYYY-MM-DD HH:mm:ss');
@@ -92,7 +102,7 @@ floorGroup2.on('loaded',function(){
             id: 'btn-rank',
             class: 'btn',
             type: 'button',
-            text: '店铺客流量排名'
+            text: '显示店铺客流量排名'
         }));
 
         $('#right-panel-container1').empty()
@@ -105,15 +115,15 @@ floorGroup2.on('loaded',function(){
         // event2: change placeholder text and exlopde the model
         var text=this.lastChild.innerText
         env.visible=false;
-        if (text == '展开'){
-            this.lastChild.innerText='收起'
+        if (text == '展开楼层'){
+            this.lastChild.innerText='收起楼层'
             explode();
         }
-        else{this.lastChild.innerText='展开';
-            env.visible=true;
-            contract();
-            $('#button-rank').empty();
-            $('#right-panel-container1').empty()}
+        else{this.lastChild.innerText='展开楼层';
+        env.visible=true;
+        contract();
+        $('#button-rank').empty();
+        $('#right-panel-container1').empty()}
 
         //button2 event: show store rank
         button2.on('click', function(){
@@ -121,34 +131,34 @@ floorGroup2.on('loaded',function(){
             if (selected_floor){
                 showStoreRank(selected_floor)
             }
-            else{alert('select a floor first')}
+            else{alert('请先选择楼层')}
         })
-            
+
     })
     function explode(){
         // console.log('exploded!')
         for (const [key, value] of Object.entries(floorGroup2.meshes)) {
         //    console.log(key)
-           value.position=[0,id2height[key],0]
+        value.position=[0,id2height[key],0]
         //    console.log(value.position)
-        }
     }
-    
-    function contract(){
+}
+
+function contract(){
         // console.log('contracted!')
         for (const [key, value] of Object.entries(floorGroup2.meshes)) {
-           value.position=[0,0,0]
+         value.position=[0,0,0]
         //    console.log(value.position)
-        }
     }
+}
 
-    function showStoreRank(floor){
-        console.log('rank function called!')
-        console.log(display_data)
-        createRank(display_data)
-    }
+function showStoreRank(floor){
+    console.log('rank function called!')
+    console.log(display_data)
+    createRank(display_data)
+}
 
-    cameraControl.on("picked", function (hit) { 
+cameraControl.on("picked", function (hit) { 
         // console.log('picked!') 
         // console.log(hit.mesh.id)
         if(keys.includes(hit.mesh.id)){
@@ -158,7 +168,6 @@ floorGroup2.on('loaded',function(){
             }
         }
     })
-
 });
 
 function loadRangeData(startDateTime,endDateTime,floor_id){
@@ -166,7 +175,7 @@ function loadRangeData(startDateTime,endDateTime,floor_id){
     // console.log("search btwn: ",startDateTime,endDateTime)
     // console.log("search floor: ",floor_id)
 
-    $.post(apisUrl + '/get_floor_kpis', {'start_time': startDateTime, 'end_time': endDateTime, 'floor_id': "'"+floor_id+"'"}, function(data, textStatus){
+    $.post(apisUrl + '/get_floor_kpis', {'start_time': startDateTime, 'end_time': endDateTime, 'floor_id': "'"+floor_id+"'", 'property_id': property_id}, function(data, textStatus){
         if (textStatus=='success'){
 
             $('#chart-title').append("<ul id='title'>")
@@ -184,7 +193,6 @@ function loadRangeData(startDateTime,endDateTime,floor_id){
             DonutChartBasic(dataWrangle(data)[7],['进店客流','离店客流'],color_platter.slice(0,2))
         }
         else alert('fail loading data');
-
     })
 }
 
@@ -258,13 +266,13 @@ function dataWrangle(data){
     var nohat_tot=nohat_cnt.reduce(function(a,b){return a+b},0);
 
     return [[female_tot,male_tot],
-            [age16minus_tot,age17to30_tot,age31to45_tot,age46to60_tot,age60plus_tot],
-            [bodyfat_tot,bodynormal_tot,bodythin_tot],
-            [baldhead_tot,longhair_tot,otherhair_tot],
-            [blackhair_tot,othercolorhair_tot],
-            [withglasses_tot,noglasses_tot],
-            [hashat_tot,nohat_tot],
-            [enter_tot,exit_tot]]
+    [age16minus_tot,age17to30_tot,age31to45_tot,age46to60_tot,age60plus_tot],
+    [bodyfat_tot,bodynormal_tot,bodythin_tot],
+    [baldhead_tot,longhair_tot,otherhair_tot],
+    [blackhair_tot,othercolorhair_tot],
+    [withglasses_tot,noglasses_tot],
+    [hashat_tot,nohat_tot],
+    [enter_tot,exit_tot]]
 }
 
 function createStackedBar(data,categories,title,parentElement){
@@ -283,8 +291,8 @@ function createStackedBar(data,categories,title,parentElement){
         // console.log(colors)
     }
     var options = {
-            series: series,
-            chart: {
+        series: series,
+        chart: {
             type: 'bar',
             height: '70%',
             stacked: true,
@@ -296,7 +304,7 @@ function createStackedBar(data,categories,title,parentElement){
 
         plotOptions: {
             bar: {
-            horizontal: true,
+                horizontal: true,
             },
         },
         colors: colors,
@@ -317,37 +325,38 @@ function createStackedBar(data,categories,title,parentElement){
         },
         stroke: {
             show: false,
-            width: 0.1,
+            width: 1,
             colors: ['#fff']
-          },
+        },
         tooltip: {
             y: {
-            formatter: function (val) {
-                return val
-            }
+                formatter: function (val) {
+                    return val
+                }
             }
         },
         fill: {
-            opacity: 1
+            opacity: 0.6
         },
         legend: {
-            position: 'bottom',
-            horizontalAlign: 'middle',
+            position: 'top',
+            horizontalAlign: 'bottom',
             offsetX: 40,
+            offsetY: 23,
             labels: {
                 colors:'white',
 
-              },
+            },
             markers: {
                 width:8,
                 height: 8,
             },
             fontSize: '8px'
         }
-      };
+    };
 
-      var chart = new ApexCharts(document.querySelector("#"+parentElement), options);
-      chart.render();
+    var chart = new ApexCharts(document.querySelector("#"+parentElement), options);
+    chart.render();
 }
 
 function DonutChartBasic(data,labels,colors){
@@ -356,54 +365,54 @@ function DonutChartBasic(data,labels,colors){
     var options = {
         series: data,
         chart: {
-        type: 'donut',
-        height: 220,
-      },
-      dataLabels: {
-        enabled: false
-      },
-      tooltip: {
-        y: {
-        formatter: function(val) {
-            return (val*100/total).toFixed(1)+"%"
-        }
-        }
-    },
-      colors: colors,
-      labels:labels,
-      legend: {
-        position: 'bottom',
-        fontSize:'8px',
-        labels: {
-            colors: 'white',
-            useSeriesColors: false
+            type: 'donut',
+            height: '150',
+            position:'right'
         },
-        markers:{
-            width: 8,
-            height: 8
-        }
-      },
-      title: {
-        text: '全楼层进出客流统计',
-        align: 'left',
-        // margin: 10,
-        offsetX: 0,
-        offsetY: 0,
-        floating: true,
-        style: {
-          fontSize:  '14px',
-          fontWeight:  'regular',
-          fontFamily:  undefined,
-          color:  'white'
+        dataLabels: {
+            enabled: false
         },
-        }
-    };
+        tooltip: {
+            y: {
+                formatter: function(val) {
+                    return (val*100/total).toFixed(1)+"%"
+                }
+            }
+        },
+        colors: colors,
+        labels:labels,
+        legend: {
+            position: 'right',
+            fontSize:'8px',
+            labels: {
+                colors: 'white',
+                useSeriesColors: false
+            },
+            markers:{
+                width: 8,
+                height: 8
+            }
+        },
+        title: {
+            text: '全楼层进出客流统计',
+            align: 'left',
+            offsetX: 0,
+            offsetY: 0,
+            floating: true,
+            style: {
+              fontSize:  '14px',
+              fontWeight:  'regular',
+              fontFamily:  undefined,
+              color:  'white'
+          },
+      }
+  };
 
-      var chart = new ApexCharts(document.querySelector("#pie-chart"), options);
-      chart.render();
+  var chart = new ApexCharts(document.querySelector("#pie-chart"), options);
+  chart.render();
 }
 
-function  createRank(data){
+function createRank(data){
     $('#panel-body1').empty();
     // console.log('data in',data)
     var enter_cnt=new Array();
@@ -413,42 +422,38 @@ function  createRank(data){
     // var passer_cnt=new Array();
     console.log('data in',data)
     // for (let i=0;i<data.length;i++) {
-    for (var [key,value] of Object.entries(data)){
-        enter_temp=[]
-        exit_temp=[]
-        watcher_temp=[]
-        value.forEach(d=>{
-            enter_temp.push(parseInt(d.enter_cnt))
-            exit_temp.push(parseInt(d.exit_cnt))
-            watcher_temp.push(parseInt(d.watcher_cnt))
-        })
-        var enter_sum=enter_temp.reduce(function(a,b){return a+b},0)
-        var exit_sum=exit_temp.reduce(function(a,b){return a+b},0)
-        var watcher_sum=watcher_temp.reduce(function(a,b){return a+b},0)
-        var total=enter_sum+exit_sum+watcher_sum
-        enter_cnt.push(Math.round(enter_sum*100/total))
-        exit_cnt.push(Math.round(exit_sum/total))
-        watcher_cnt.push(Math.round(watcher_sum/total))
-        all_stores.push(key)
-    };
-    enter_cnt.sort((a,b)=>b-a)
-    all_stores.sort((a,b)=>enter_cnt[all_stores.indexOf(a)] - enter_cnt[all_stores.indexOf(b)])
-    // console.log('rank chart called!')
-    console.log(enter_cnt)
-    console.log(all_stores)
-
+        for (var [key,value] of Object.entries(data)){
+            enter_temp=[]
+            exit_temp=[]
+            watcher_temp=[]
+            value.forEach(d=>{
+                enter_temp.push(parseInt(d.enter_cnt))
+                exit_temp.push(parseInt(d.exit_cnt))
+                watcher_temp.push(parseInt(d.watcher_cnt))
+            })
+            var enter_sum=enter_temp.reduce(function(a,b){return a+b},0)
+            var exit_sum=exit_temp.reduce(function(a,b){return a+b},0)
+            var watcher_sum=watcher_temp.reduce(function(a,b){return a+b},0)
+            var total=enter_sum+exit_sum+watcher_sum
+            enter_cnt.push(Math.round(enter_sum*100/total))
+            exit_cnt.push(Math.round(exit_sum/total))
+            watcher_cnt.push(Math.round(watcher_sum/total))
+            all_stores.push(key)
+        };
+        enter_cnt.sort((a,b)=>b-a)
+        all_stores.sort((a,b)=>enter_cnt[all_stores.indexOf(a)] - enter_cnt[all_stores.indexOf(b)])
     var options = {
         series: [{
-        data: enter_cnt
-      }],
+            data: enter_cnt
+        }],
         chart: {
-        type: 'bar',
-        height: '100%'
-      },
-      plotOptions: {
-        bar: {
-          horizontal: true,
+            type: 'bar',
+            height: '100%'
         },
+        plotOptions: {
+            bar: {
+              horizontal: true,
+          },
       },
       colors:['#FF0091'],
       grid:{
@@ -460,11 +465,11 @@ function  createRank(data){
             color: 'white',
             fontSize: '12pt'
         }
-      },
-      dataLabels: {
+    },
+    dataLabels: {
         enabled: false
-      },
-      yaxis: {
+    },
+    yaxis: {
         axisBorder: {
             show:false
         },
@@ -479,8 +484,8 @@ function  createRank(data){
         lines:{
             show: false
         },
-      },
-      xaxis: {
+    },
+    xaxis: {
         min:0,
         max:40,
         lines:{
@@ -496,21 +501,21 @@ function  createRank(data){
             show:false
         },
         categories: all_stores,
-      },
-      tooltip: {
+    },
+    tooltip: {
         y: {
             title:{
                 formatter: function(val){
                     return null
                 }
-                },
+            },
             formatter: function(val){
                 return val+'%'
             }
-            }
-        
         }
-      };
-      var chart = new ApexCharts(document.querySelector("#panel-body1"), options);
-      chart.render();    
+        
+    }
+};
+var chart = new ApexCharts(document.querySelector("#panel-body1"), options);
+chart.render();
 }

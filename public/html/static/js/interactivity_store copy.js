@@ -1,5 +1,5 @@
 
-const apisUrl='http://161.189.24.17:3005'
+const apisUrl='https://api.placeint.net:3005'
 var store_id_sel;
 var stores_sel;
 var startDateTime='';

@@ -1,5 +1,5 @@
 
-const apisUrl='http://161.189.24.17:3005'
+const apisUrl='https://api.placeint.net:3005'
 var store_id_sel;
 var stores_sel;
 var startDateTime='';
@@ -29,7 +29,7 @@ $('#datetime-body').append($('<input>',{
     placeholder:'选择日期时间: ',
     id: 'input'
 }));
-$.post(apisUrl + '/get_available_date', function(data, textStatus, jqXHR){
+$.post(apisUrl + '/get_available_date', {'property_id': property_id}, function(data, textStatus, jqXHR){
     $('#datetime-body').daterangepicker({minDate:moment(data[0].start_date),
                                          maxDate:moment(data[0].end_date),
                                          timePicker: true, 
@@ -66,7 +66,7 @@ function loadRangeData(startDateTime,endDateTime,store_id){
     console.log('store: ', store_id)
     console.log("search btwn: ",startDateTime,endDateTime)
 
-    $.post(apisUrl + '/get_store_kpis2', {'start_time': startDateTime, 'end_time': endDateTime, 'store_id': store_id}, function(data, textStatus, jqXHR){
+    $.post(apisUrl + '/get_store_kpis2', {'start_time': startDateTime, 'end_time': endDateTime, 'store_id': store_id, 'property_id': property_id}, function(data, textStatus, jqXHR){
         if (textStatus=='success'){
             console.log('data requested!');
             console.log(data)
