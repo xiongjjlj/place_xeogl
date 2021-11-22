@@ -1,5 +1,5 @@
 // glabal variables
-const apisUrl='https://api.placeint.net:3005'
+const apisUrl='https://api.placeint.net:3006'
 var stores = [];
 var floors= [];
 var selected_floor;
