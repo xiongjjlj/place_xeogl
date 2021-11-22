@@ -1,8 +1,9 @@
-// libraries
+require('dotenv').config()
 const http = require('http');
+const https = require('https');
 const bodyParser = require('body-parser');
 const express = require('express');
-
+const fs = require('fs');
 
 // local dependencies
 const views = require('./routes/views');
@@ -36,9 +37,23 @@ app.use(function(err, req, res, next) {
   });
 });
 
-// port config
-const port = 8004; // config variable
-const server = http.Server(app);
-server.listen(port, function() {
-  console.log('Server running on port: ' + port);
-});
+if (process.env.USE_SSL == 'False'){
+  console.log(process.env.PORT)
+  var server = http.createServer(app).listen(process.env.PORT, function () {
+    var host = '0.0.0.0';
+    console.log('http listen on http://'+host+':'+process.env.PORT+'/');
+  });
+}
+else if (process.env.USE_SSL == 'True'){
+  var options = {
+    key: fs.readFileSync(process.env.SSL_PRIVATE_KEY),
+    cert: fs.readFileSync(process.env.SSL_CERT),
+  };
+  var server = https.createServer(options, app).listen(parseInt(process.env.PORT), function(){
+    console.log("https listening on port " + process.env.PORT);
+  });
+  console.log(server);
+}
+else {
+  console.log('USE_SSL not correctly specified!!!')
+}
