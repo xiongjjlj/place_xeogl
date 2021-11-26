@@ -118,7 +118,7 @@ floorGroup2.on("loaded", function(){
             // 选中楼层的上色
             if (lastfloor_id){
                 floorGroup2.meshes[lastfloor_id].colorize=[1,1,1]
-                floorGroup2.meshes[lastfloor_id].opacity=1
+                floorGroup2.meshes[lastfloor_id].opacity=0.5
             }
             selected_floor=hit.mesh.id
             hit.mesh.colorize=[255,0,255]
@@ -146,7 +146,7 @@ floorGroup2.on("loaded", function(){
         // ------ for store
         if (lastfloor_id){
             floorGroup2.meshes[lastfloor_id].colorize=[1,1,1]
-            floorGroup2.meshes[lastfloor_id].opacity=1
+            floorGroup2.meshes[lastfloor_id].opacity=0.5
         }
         selected_floor=''
         $('#panel-body1').empty()
